@@ -1,5 +1,4 @@
-# Sharp_Client
-This is client library for Half-Life / Adrenaline Gamer mod
+SharpClient is client library for Half-Life / Adrenaline Gamer mod
 Feel free to use it under AG because it contains all basic AG features
 
 To install it just extract all from archive into "valve" / "ag" folder,
