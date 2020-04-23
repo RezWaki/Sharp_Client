@@ -44,3 +44,4 @@ cfg file either type in console to test, full commands list:
 
 Other fixes/addins/removes:
 	[REMOVED] Scoreboard mouse click fixed
+	[FIXED] Client-side bhop prediction conflict
