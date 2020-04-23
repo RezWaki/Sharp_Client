@@ -2408,7 +2408,7 @@ void PM_NoClip()
 void PM_PreventMegaBunnyJumping( void )
 {
 	// Current player speed
-	float spd;
+	/*float spd;
 	// If we have to crop, apply this cropping fraction to velocity
 	float fraction;
 	// Speed at which bunny jumping is limited
@@ -2427,7 +2427,7 @@ void PM_PreventMegaBunnyJumping( void )
 
 	fraction = ( maxscaledspeed / spd ) * 0.65; //Returns the modifier for the velocity
 	
-	VectorScale( pmove->velocity, fraction, pmove->velocity ); //Crop it down!.
+	VectorScale( pmove->velocity, fraction, pmove->velocity ); //Crop it down!.*/
 }
 
 /*
