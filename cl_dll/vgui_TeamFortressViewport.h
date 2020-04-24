@@ -58,6 +58,7 @@ extern char *sTFClassSelection[];
 extern int sTFValidClassInts[];
 extern char *sLocalisedClasses[];
 extern int iTeamColors[5][3];
+extern int iNewTeamColors[5][3];
 extern int iNumberOfTeamColors;
 
 #define MAX_SERVERNAME_LENGTH	32

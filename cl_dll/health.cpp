@@ -28,6 +28,8 @@
 #include <string.h>
 #include <Windows.h>
 
+extern BOOL bCrosshairMustBeRed;
+extern extra_player_info_t  g_PlayerExtraInfo[MAX_PLAYERS+1];
 
 DECLARE_MESSAGE(m_Health, Health )
 DECLARE_MESSAGE(m_Health, Damage )
@@ -178,7 +180,7 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 #endif 
 }
 
-char pFrags[255];
+char pFrags[256], pTeamInfo[256];
 INT pCrossColors[2];
 INT pHudColors[3];
 
@@ -187,6 +189,16 @@ int CHudHealth::Draw(float flTime)
 	int r, g, b;
 	int a = 0, x, y;
 	int HealthWidth;
+
+	sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i %i", &pHudColors[0], &pHudColors[1], &pHudColors[2], &pHudColors[3] );
+	if( CVAR_GET_FLOAT("cl_newhud") ) {
+		gHUD.DrawHudString( (ScreenWidth/2)-(4*strlen( gHUD.RemoveColors(CVAR_GET_STRING("name")) )), ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, ScreenWidth, (char*)gHUD.RemoveColors(CVAR_GET_STRING("name")), pHudColors[0], pHudColors[1], pHudColors[2] );
+		gHUD.DrawHudNumber( 24, ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, pHudColors[0], pHudColors[1], pHudColors[2] );
+		if( gHUD.m_Teamplay ) {
+			sprintf( pTeamInfo, "Your team: %s", g_PlayerExtraInfo[gEngfuncs.GetLocalPlayer()->index].teamname );
+			gHUD.DrawHudString( (ScreenWidth/2)-(4*strlen( pTeamInfo )), 0, ScreenWidth, pTeamInfo, pHudColors[0], pHudColors[1], pHudColors[2] );
+		}
+	}
 
 	if(CVAR_GET_FLOAT("cl_drawteams")){
 		FillRGBA(0, 0, 128, 20, gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][0],
@@ -205,82 +217,83 @@ int CHudHealth::Draw(float flTime)
 		}
 	}
 
+	sscanf( CVAR_GET_STRING("cl_crosscolor"), "%i %i %i", &pCrossColors[0], &pCrossColors[1], &pCrossColors[2] );
+	if( CVAR_GET_FLOAT("cl_smart_crosshair") && bCrosshairMustBeRed ) {
+		pCrossColors[0] = 255;
+		pCrossColors[1] = pCrossColors[2] = 0; //zzzzz
+	}
 	if( CVAR_GET_FLOAT("cl_crosshair") == 1 ) {
-		sscanf( CVAR_GET_STRING("cl_crosscolor"), "%i %i %i", &pCrossColors[0], &pCrossColors[1], &pCrossColors[2] );
 		gEngfuncs.pfnFillRGBA( (ScreenWidth/2)-2, (ScreenHeight/2)-2, CVAR_GET_FLOAT("cl_crossdotsize"), CVAR_GET_FLOAT("cl_crossdotsize"), pCrossColors[0], pCrossColors[1], pCrossColors[2], 255 );
 	}
 	else if( CVAR_GET_FLOAT("cl_crosshair") == 2 ) {
-		sscanf( CVAR_GET_STRING("cl_crosscolor"), "%i %i %i", &pCrossColors[0], &pCrossColors[1], &pCrossColors[2] );
 		gEngfuncs.pfnFillRGBA( (ScreenWidth/2)-4, (ScreenHeight/2), 10, 2, pCrossColors[0], pCrossColors[1], pCrossColors[2], 255 );
 		gEngfuncs.pfnFillRGBA( (ScreenWidth/2), (ScreenHeight/2)-4, 2, 10, pCrossColors[0], pCrossColors[1], pCrossColors[2], 255 );
 	}
 	else if( CVAR_GET_FLOAT("cl_crosshair") == 3 ) {
-		sscanf( CVAR_GET_STRING("cl_crosscolor"), "%i %i %i", &pCrossColors[0], &pCrossColors[1], &pCrossColors[2] );
 		gEngfuncs.pfnFillRGBA( (ScreenWidth/2)-2, (ScreenHeight/2)-2, 4, 4, pCrossColors[0], pCrossColors[1], pCrossColors[2], 255 );
 		gEngfuncs.pfnFillRGBA( (ScreenWidth/2)-3, (ScreenHeight/2)-3, 6, 6, 0, 255, 0, 255 );
 	}
 	else if( CVAR_GET_FLOAT("cl_crosshair") == 4 ) {
-		sscanf( CVAR_GET_STRING("cl_crosscolor"), "%i %i %i", &pCrossColors[0], &pCrossColors[1], &pCrossColors[2] );
 		gEngfuncs.pfnFillRGBA( (ScreenWidth/2)-10, (ScreenHeight/2)-2, 10, 2, pCrossColors[0], pCrossColors[1], pCrossColors[2], 255 );
 		gEngfuncs.pfnFillRGBA( (ScreenWidth/2)-2, (ScreenHeight/2)-10, 2, 10, pCrossColors[0], pCrossColors[1], pCrossColors[2], 255 );
 	}
 
 	if ( (gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) || gEngfuncs.IsSpectateOnly() )
 		return 1;
-
-	if ( !m_SpriteHandle_t )
-		m_SpriteHandle_t = LoadSprite(PAIN_NAME);
+	if( !CVAR_GET_FLOAT("cl_newhud") ) {
+		if ( !m_SpriteHandle_t )
+			m_SpriteHandle_t = LoadSprite(PAIN_NAME);
 	
-	// Has health changed? Flash the health #
-	if (m_fFade)
-	{
-		m_fFade -= (gHUD.m_flTimeDelta * 20);
-		if (m_fFade <= 0)
+		// Has health changed? Flash the health #
+		if (m_fFade)
 		{
+			m_fFade -= (gHUD.m_flTimeDelta * 20);
+			if (m_fFade <= 0)
+			{
+				a = MIN_ALPHA;
+				m_fFade = 0;
+			}
+
+			// Fade the health number back to dim
+
+			a = MIN_ALPHA +  (m_fFade/FADE_TIME) * 128;
+
+		}
+		else
 			a = MIN_ALPHA;
-			m_fFade = 0;
+
+		// If health is getting low, make it bright red
+		if (m_iHealth <= 15)
+			a = 255;
+		
+		GetPainColor( r, g, b );
+		ScaleColors(r, g, b, a );
+
+		// Only draw health if we have the suit.
+		if (gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)))
+		{
+			HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
+			int CrossWidth = gHUD.GetSpriteRect(m_HUD_cross).right - gHUD.GetSpriteRect(m_HUD_cross).left;
+
+			y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
+			x = CrossWidth /2;
+
+			SPR_Set(gHUD.GetSprite(m_HUD_cross), pHudColors[0], pHudColors[1], pHudColors[2]);
+			SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_cross));
+
+			x = CrossWidth + HealthWidth / 2;
+
+			x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, pHudColors[0], pHudColors[1], pHudColors[2]);
+
+			x += HealthWidth/2;
+
+			int iHeight = gHUD.m_iFontHeight;
+			int iWidth = HealthWidth/10;
+			FillRGBA(x, y, iWidth, iHeight, pHudColors[0], pHudColors[1], pHudColors[2], pHudColors[3]);
 		}
 
-		// Fade the health number back to dim
-
-		a = MIN_ALPHA +  (m_fFade/FADE_TIME) * 128;
-
+		DrawDamage(flTime);
 	}
-	else
-		a = MIN_ALPHA;
-
-	// If health is getting low, make it bright red
-	if (m_iHealth <= 15)
-		a = 255;
-		
-	GetPainColor( r, g, b );
-	ScaleColors(r, g, b, a );
-
-	// Only draw health if we have the suit.
-	if (gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)))
-	{
-		sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i %i", &pHudColors[0], &pHudColors[1], &pHudColors[2], &pHudColors[3] );
-		HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
-		int CrossWidth = gHUD.GetSpriteRect(m_HUD_cross).right - gHUD.GetSpriteRect(m_HUD_cross).left;
-
-		y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
-		x = CrossWidth /2;
-
-		SPR_Set(gHUD.GetSprite(m_HUD_cross), pHudColors[0], pHudColors[1], pHudColors[2]);
-		SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_cross));
-
-		x = CrossWidth + HealthWidth / 2;
-
-		x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, pHudColors[0], pHudColors[1], pHudColors[2]);
-
-		x += HealthWidth/2;
-
-		int iHeight = gHUD.m_iFontHeight;
-		int iWidth = HealthWidth/10;
-		FillRGBA(x, y, iWidth, iHeight, pHudColors[0], pHudColors[1], pHudColors[2], pHudColors[3]);
-	}
-
-	DrawDamage(flTime);
 	return DrawPain(flTime);
 }
 

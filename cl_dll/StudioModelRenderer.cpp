@@ -17,11 +17,13 @@
 #include "cl_entity.h"
 #include "dlight.h"
 #include "triangleapi.h"
+#include "pmtrace.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <memory.h>
 #include <math.h>
+#include <Windows.h>
 
 #include "studio_util.h"
 #include "r_studioint.h"
@@ -33,6 +35,8 @@
 engine_studio_api_t IEngineStudio;
 
 cvar_s* m_pCvarFakeDrawEntities;
+BOOL bCrosshairMustBeRed = FALSE;
+INT pLightColors[2];
 
 /////////////////////
 // Implementation of CStudioModelRenderer.h
@@ -1154,6 +1158,17 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 
 		IEngineStudio.StudioEntityLight( &lighting );
 
+		if( CVAR_GET_FLOAT("r_noitemlights") ) {
+			if( CVAR_GET_FLOAT("r_forcerendercolors") ) {
+				sscanf( CVAR_GET_STRING("r_forcerendercolors"), "%i %i %i", &pLightColors[0], &pLightColors[1], &pLightColors[2] );
+			}
+			else{
+				pLightColors[0] = pLightColors[1] = pLightColors[2] = 255;
+			}
+			lighting.color = Vector(pLightColors[0], pLightColors[1], pLightColors[2]);
+			lighting.ambientlight = 255;
+		}
+
 		// model and frame independant
 		IEngineStudio.StudioSetupLighting (&lighting);
 
@@ -1339,6 +1354,10 @@ void CStudioModelRenderer::StudioProcessGait( entity_state_t *pplayer )
 		m_pPlayerInfo->gaitframe += pseqdesc->numframes;
 }
 
+Vector fmt_vec;
+
+pmtrace_t* pTracePlayer;
+
 /*
 ====================
 StudioDrawPlayer
@@ -1367,6 +1386,8 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 		return 0;
 
 	m_pRenderModel = IEngineStudio.SetupPlayerModel( m_nPlayerIndex );
+	//m_pRenderModel->name = "models/player/hgrunt/hgrunt.mdl";
+	//strcpy( m_pRenderModel->name, "models/player/hgrunt/hgrunt.mdl" );
 	if (m_pRenderModel == NULL)
 		return 0;
 
@@ -1415,6 +1436,8 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 		(*m_pModelsDrawn)++;
 		(*m_pStudioModelCount)++; // render data cache cookie
 
+		//IEngineStudio.fps
+
 		if (m_pStudioHeader->numbodyparts == 0)
 			return 1;
 	}
@@ -1456,6 +1479,17 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 		IEngineStudio.StudioDynamicLight(m_pCurrentEntity, &lighting );
 
 		IEngineStudio.StudioEntityLight( &lighting );
+
+		if( CVAR_GET_FLOAT("r_noplayerlights") ) {
+			if( CVAR_GET_FLOAT("r_forcerendercolors") ) {
+				sscanf( CVAR_GET_STRING("r_forcerendercolors"), "%i %i %i", &pLightColors[0], &pLightColors[1], &pLightColors[2] );
+			}
+			else{
+				pLightColors[0] = pLightColors[1] = pLightColors[2] = 255;
+			}
+			lighting.color = Vector(pLightColors[0], pLightColors[1], pLightColors[2]);
+			lighting.ambientlight = 255;
+		}
 
 		// model and frame independant
 		IEngineStudio.StudioSetupLighting (&lighting);
@@ -1500,6 +1534,24 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 		}
 	}
 
+	if( CVAR_GET_FLOAT("cl_smart_crosshair") ) {
+		pTracePlayer = gEngfuncs.PM_TraceLine( gEngfuncs.GetLocalPlayer()->origin, m_pCurrentEntity->origin, 1, 2, -1 );
+		if( pTracePlayer->fraction == 1.0 ) {
+			gEngfuncs.pTriAPI->WorldToScreen( m_pCurrentEntity->origin, fmt_vec );
+			fmt_vec.x *= 256;
+			fmt_vec.y *= 256;
+			fmt_vec.z *= 256;
+			fmt_vec.x = fmt_vec.x+ScreenWidth/2;
+			fmt_vec.y = -fmt_vec.y+ScreenHeight/2;
+			if( fmt_vec.x > (ScreenWidth/2)-8 && fmt_vec.x < (ScreenWidth/2)+16
+				&& fmt_vec.y > (ScreenHeight/2)-16 && fmt_vec.y < (ScreenHeight/2)+16 ) {
+					bCrosshairMustBeRed = TRUE;
+			}
+			else{
+				bCrosshairMustBeRed = FALSE;
+			}
+		}
+	}
 	return 1;
 }
 

@@ -50,6 +50,12 @@ float g_ColorRed[3]		= { 1.0, 0.25, 0.25 };
 float g_ColorGreen[3]	= { 0.6, 1.0, 0.6 };
 float g_ColorYellow[3]	= { 1.0, 0.7, 0.0 };
 float g_ColorGrey[3]	= { 0.8, 0.8, 0.8 };
+//new colors
+float g_newColorBlue[3]	= { 0.5, 0.5, 1.0 };
+float g_newColorRed[3]		= { 1.0, 0.0, 0.0 };
+float g_newColorGreen[3]	= { 0.0, 1.0, 0.0 };
+float g_newColorYellow[3]	= { 1.0, 1.0, 0.0 };
+float g_newColorGrey[3]	= { 0.8, 0.8, 0.8 };
 
 float *GetClientColor( int clientIndex )
 {
@@ -60,6 +66,22 @@ float *GetClientColor( int clientIndex )
 	case 3: return g_ColorYellow;
 	case 4: return g_ColorGreen;
 	case 0: return g_ColorYellow;
+
+		default	: return g_ColorGrey;
+	}
+
+	return NULL;
+}
+
+float *GetClientNewColor( int clientIndex )
+{
+	switch ( g_PlayerExtraInfo[clientIndex].teamnumber )
+	{
+	case 1:	return g_newColorBlue;
+	case 2: return g_newColorRed;
+	case 3: return g_newColorYellow;
+	case 4: return g_newColorGreen;
+	case 0: return g_newColorYellow;
 
 		default	: return g_ColorGrey;
 	}
@@ -118,16 +140,16 @@ int CHudDeathNotice :: Draw( float flTime )
 			y = YRES(DEATHNOTICE_TOP) + 2 + (20 * i);  //!!!
 
 			int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
-			x = ScreenWidth - ConsoleStringLen(rgDeathNoticeList[i].szVictim) - (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
+			x = ScreenWidth - ConsoleStringLen( gHUD.RemoveColors(rgDeathNoticeList[i].szVictim) ) - (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
 
 			if ( !rgDeathNoticeList[i].iSuicide )
 			{
-				x -= (5 + ConsoleStringLen( rgDeathNoticeList[i].szKiller ) );
+				x -= (5 + ConsoleStringLen( gHUD.RemoveColors(rgDeathNoticeList[i].szKiller )) );
 
 				// Draw killers name
 				if ( rgDeathNoticeList[i].KillerColor )
 					gEngfuncs.pfnDrawSetTextColor( rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2] );
-				x = 5 + DrawConsoleString( x, y, rgDeathNoticeList[i].szKiller );
+				x = 5 + DrawConsoleString( x, y, gHUD.RemoveColors(rgDeathNoticeList[i].szKiller) );
 			}
 
 			r = 255;  g = 80;	b = 0;
@@ -147,7 +169,7 @@ int CHudDeathNotice :: Draw( float flTime )
 			{
 				if ( rgDeathNoticeList[i].VictimColor )
 					gEngfuncs.pfnDrawSetTextColor( rgDeathNoticeList[i].VictimColor[0], rgDeathNoticeList[i].VictimColor[1], rgDeathNoticeList[i].VictimColor[2] );
-				x = DrawConsoleString( x, y, rgDeathNoticeList[i].szVictim );
+				x = DrawConsoleString( x, y, gHUD.RemoveColors(rgDeathNoticeList[i].szVictim) );
 			}
 		}
 	}
@@ -198,7 +220,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	}
 	else
 	{
-		rgDeathNoticeList[i].KillerColor = GetClientColor( killer );
+		rgDeathNoticeList[i].KillerColor = GetClientNewColor( killer );
 		strncpy( rgDeathNoticeList[i].szKiller, killer_name, MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szKiller[MAX_PLAYER_NAME_LENGTH-1] = 0;
 	}
@@ -215,7 +237,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	}
 	else
 	{
-		rgDeathNoticeList[i].VictimColor = GetClientColor( victim );
+		rgDeathNoticeList[i].VictimColor = GetClientNewColor( victim );
 		strncpy( rgDeathNoticeList[i].szVictim, victim_name, MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szVictim[MAX_PLAYER_NAME_LENGTH-1] = 0;
 	}
@@ -299,7 +321,5 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	return 1;
 }
-
-
 
 

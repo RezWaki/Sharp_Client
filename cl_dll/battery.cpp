@@ -71,7 +71,6 @@ int CHudBattery:: MsgFunc_Battery(const char *pszName,  int iSize, void *pbuf )
 	return 1;
 }
 
-
 int CHudBattery::Draw(float flTime)
 {
 	if ( gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH )
@@ -85,56 +84,61 @@ int CHudBattery::Draw(float flTime)
 
 	sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i %i", &r, &g, &b, &a );
 
+	if( CVAR_GET_FLOAT("cl_newhud") ) {
+		//FillRGBA( 0, ScreenHeight-(gHUD.m_scrinfo.iCharHeight*2), ScreenWidth, (gHUD.m_scrinfo.iCharHeight*2), 255, 255, 255, 150 );
+		gHUD.DrawHudNumber( 128, ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, DHN_3DIGITS | DHN_DRAWZERO, m_iBat, r, g, b );
+	}
+
 	//UnpackRGB(r,g,b, RGB_YELLOWISH);
+	if( !CVAR_GET_FLOAT("cl_newhud") ) {
+		if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
+			return 1;
 
-	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
-		return 1;
-
-	// Has health changed? Flash the health #
-	if (m_fFade)
-	{
-		if (m_fFade > FADE_TIME)
-			m_fFade = FADE_TIME;
-
-		m_fFade -= (gHUD.m_flTimeDelta * 20);
-		if (m_fFade <= 0)
+		// Has health changed? Flash the health #
+		if (m_fFade)
 		{
-			a = 128;
-			m_fFade = 0;
+			if (m_fFade > FADE_TIME)
+				m_fFade = FADE_TIME;
+
+			m_fFade -= (gHUD.m_flTimeDelta * 20);
+			if (m_fFade <= 0)
+			{
+				a = 128;
+				m_fFade = 0;
+			}
+
+			// Fade the health number back to dim
+
+			a = MIN_ALPHA +  (m_fFade/FADE_TIME) * 128;
+
+		}
+		else
+			a = MIN_ALPHA;
+
+		ScaleColors(r, g, b, a );
+	
+		int iOffset = (m_prc1->bottom - m_prc1->top)/6;
+
+		y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
+		x = ScreenWidth/5;
+
+		// make sure we have the right sprite handles
+		if ( !m_SpriteHandle_t1 )
+			m_SpriteHandle_t1 = gHUD.GetSprite( gHUD.GetSpriteIndex( "suit_empty" ) );
+		if ( !m_SpriteHandle_t2 )
+			m_SpriteHandle_t2 = gHUD.GetSprite( gHUD.GetSpriteIndex( "suit_full" ) );
+
+		SPR_Set(m_SpriteHandle_t1, r, g, b );
+		SPR_DrawAdditive( 0,  x, y - iOffset, m_prc1);
+
+		if (rc.bottom > rc.top)
+		{
+			SPR_Set(m_SpriteHandle_t2, r, g, b );
+			SPR_DrawAdditive( 0, x, y - iOffset + (rc.top - m_prc2->top), &rc);
 		}
 
-		// Fade the health number back to dim
-
-		a = MIN_ALPHA +  (m_fFade/FADE_TIME) * 128;
-
+		x += (m_prc1->right - m_prc1->left);
+		x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iBat, r, g, b);
 	}
-	else
-		a = MIN_ALPHA;
-
-	ScaleColors(r, g, b, a );
-	
-	int iOffset = (m_prc1->bottom - m_prc1->top)/6;
-
-	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
-	x = ScreenWidth/5;
-
-	// make sure we have the right sprite handles
-	if ( !m_SpriteHandle_t1 )
-		m_SpriteHandle_t1 = gHUD.GetSprite( gHUD.GetSpriteIndex( "suit_empty" ) );
-	if ( !m_SpriteHandle_t2 )
-		m_SpriteHandle_t2 = gHUD.GetSprite( gHUD.GetSpriteIndex( "suit_full" ) );
-
-	SPR_Set(m_SpriteHandle_t1, r, g, b );
-	SPR_DrawAdditive( 0,  x, y - iOffset, m_prc1);
-
-	if (rc.bottom > rc.top)
-	{
-		SPR_Set(m_SpriteHandle_t2, r, g, b );
-		SPR_DrawAdditive( 0, x, y - iOffset + (rc.top - m_prc2->top), &rc);
-	}
-
-	x += (m_prc1->right - m_prc1->left);
-	x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iBat, r, g, b);
-
 	return 1;
 }

@@ -91,6 +91,15 @@ int iTeamColors[5][3] =
 	{ 145, 215, 140 },	// Green
 };
 
+int iNewTeamColors[5][3] =
+{
+	{ 255, 150, 0 },	// HL orange (default)
+	{ 100, 100, 255 },	// Blue
+	{ 50, 0, 255 },	// Red
+	{ 255, 255, 0 },	// Yellow
+	{ 0, 255, 0 },	// Green
+};
+
 
 // Used for Class specific buttons
 char *sTFClasses[] =

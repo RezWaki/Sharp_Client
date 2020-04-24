@@ -56,8 +56,8 @@ int AgHudVote::Draw(float fTime)
   sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i %i", &r, &g, &b, &a );
 
   char szText[128];
-  plusX = (ScreenWidth/2)/2;
-  plusY = (ScreenHeight/2);
+  plusX = (ScreenWidth/2)/1;
+  plusY = (ScreenHeight/2)/2;
   if( CVAR_GET_FLOAT("cl_vote_defaultpos") ) {
 	  plusX = ScreenWidth/20;
 	  plusY = ScreenHeight/8;

@@ -9,13 +9,20 @@
 
 #include "hud.h"
 #include "cl_util.h"
+#include "const.h"
+#include "com_model.h"
+#include "studio.h"
+#include "entity_state.h"
+#include "cl_entity.h"
+#include "dlight.h"
+#include "triangleapi.h"
+#include "r_studioint.h"
+#include "StudioModelRenderer.h"
+#include "GameStudioModelRenderer.h"
 
 // Triangle rendering apis are in gEngfuncs.pTriAPI
 
-#include "const.h"
-#include "entity_state.h"
-#include "cl_entity.h"
-#include "triangleapi.h"
+
 
 #define DLLEXPORT __declspec( dllexport )
 
@@ -24,6 +31,8 @@ extern "C"
 	void DLLEXPORT HUD_DrawNormalTriangles( void );
 	void DLLEXPORT HUD_DrawTransparentTriangles( void );
 };
+
+extern engine_studio_api_t IEngineStudio;
 
 //#define TEST_IT
 #if defined( TEST_IT )
