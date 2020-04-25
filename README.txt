@@ -38,3 +38,4 @@ Other fixes/addins/removes:
 	[ADDED] Playermodels/anymodels light processing control
 	[ADDED] Force light colors on models
 	[ADDED] Smart crosshair
+	[FIXED] New HUD's pain-hud fix
