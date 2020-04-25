@@ -169,7 +169,7 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 #else
 	if (m_iHealth > 25)
 	{
-		UnpackRGB(r,g,b, RGB_YELLOWISH);
+		//UnpackRGB(r,g,b, RGB_YELLOWISH);
 	}
 	else
 	{
@@ -177,6 +177,7 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 		g = 0;
 		b = 0;
 	}
+	sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i", &r, &g, &b );
 #endif 
 }
 
@@ -240,12 +241,11 @@ int CHudHealth::Draw(float flTime)
 
 	if ( (gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) || gEngfuncs.IsSpectateOnly() )
 		return 1;
-	if( !CVAR_GET_FLOAT("cl_newhud") ) {
 		if ( !m_SpriteHandle_t )
 			m_SpriteHandle_t = LoadSprite(PAIN_NAME);
-	
+	if( !CVAR_GET_FLOAT("cl_newhud") ) {
 		// Has health changed? Flash the health #
-		if (m_fFade)
+		/*if (m_fFade)
 		{
 			m_fFade -= (gHUD.m_flTimeDelta * 20);
 			if (m_fFade <= 0)
@@ -260,11 +260,11 @@ int CHudHealth::Draw(float flTime)
 
 		}
 		else
-			a = MIN_ALPHA;
+			a = MIN_ALPHA;*/
 
 		// If health is getting low, make it bright red
-		if (m_iHealth <= 15)
-			a = 255;
+		//if (m_iHealth <= 15)
+		//	a = 255;
 		
 		GetPainColor( r, g, b );
 		ScaleColors(r, g, b, a );
@@ -291,9 +291,8 @@ int CHudHealth::Draw(float flTime)
 			int iWidth = HealthWidth/10;
 			FillRGBA(x, y, iWidth, iHeight, pHudColors[0], pHudColors[1], pHudColors[2], pHudColors[3]);
 		}
-
-		DrawDamage(flTime);
 	}
+	DrawDamage(flTime);
 	return DrawPain(flTime);
 }
 
