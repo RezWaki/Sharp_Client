@@ -327,8 +327,9 @@ void CHud :: Init( void )
 	CVAR_CREATE( "r_noplayerlights", "0", NULL );
 	CVAR_CREATE( "r_noitemlights", "0", NULL );
 	CVAR_CREATE( "r_forcerendercolors", "0", NULL );
-	CVAR_CREATE( "cl_newhud", "0", NULL );
+	CVAR_CREATE( "cl_newhud", "1", NULL );
 	CVAR_CREATE( "cl_usenewteamcolors", "1", NULL );
+	CVAR_CREATE( "cl_hltvmode", "0", NULL );
 
 	m_pSpriteList = NULL;
 

@@ -25,6 +25,7 @@
 #include "screenfade.h"
 #include "shake.h"
 #include "hltv.h"
+#include "demo_api.h"
 
 // Spectator Mode
 extern "C" 
@@ -176,6 +177,7 @@ void V_InterpolateAngles( float *start, float *end, float *output, float frac )
 // Quakeworld bob code, this fixes jitters in the mutliplayer since the clock (pparams->time) isn't quite linear
 float V_CalcBob ( struct ref_params_s *pparams )
 {
+	if( CVAR_GET_FLOAT("cl_hltvmode") ) return 0.0;
 	static	double	bobtime;
 	static float	bob;
 	float	cycle;

@@ -86,6 +86,12 @@ void EV_TrainPitchAdjust( struct event_args_s *args );
 #define VECTOR_CONE_15DEGREES Vector( 0.13053, 0.13053, 0.13053 )
 #define VECTOR_CONE_20DEGREES Vector( 0.17365, 0.17365, 0.17365 )
 
+void SendWeapAnim( int sequence, int body ) {
+	if( !CVAR_GET_FLOAT("cl_hltvmode") )
+		gEngfuncs.pEventAPI->EV_WeaponAnimation( sequence, body );
+	else return;
+}
+
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
 // returns volume of strike instrument (crowbar) to play
@@ -469,7 +475,7 @@ void EV_FireGlock1( event_args_t *args )
 	if ( EV_IsLocal( idx ) )
 	{
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation( empty ? GLOCK_SHOOT_EMPTY : GLOCK_SHOOT, 2 );
+		SendWeapAnim( empty ? GLOCK_SHOOT_EMPTY : GLOCK_SHOOT, 2 );
 
 		V_PunchAxis( 0, -2.0 );
 	}
@@ -514,7 +520,7 @@ void EV_FireGlock2( event_args_t *args )
 	{
 		// Add muzzle flash to current weapon model
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation( GLOCK_SHOOT, 2 );
+		SendWeapAnim( GLOCK_SHOOT, 2 );
 
 		V_PunchAxis( 0, -2.0 );
 	}
@@ -568,7 +574,7 @@ void EV_FireShotGunDouble( event_args_t *args )
 	{
 		// Add muzzle flash to current weapon model
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation( SHOTGUN_FIRE2, 2 );
+		SendWeapAnim( SHOTGUN_FIRE2, 2 );
 		V_PunchAxis( 0, -10.0 );
 	}
 
@@ -622,7 +628,7 @@ void EV_FireShotGunSingle( event_args_t *args )
 	{
 		// Add muzzle flash to current weapon model
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation( SHOTGUN_FIRE, 2 );
+		SendWeapAnim( SHOTGUN_FIRE, 2 );
 
 		V_PunchAxis( 0, -5.0 );
 	}
@@ -679,7 +685,7 @@ void EV_FireMP5( event_args_t *args )
 	{
 		// Add muzzle flash to current weapon model
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation( MP5_FIRE1 + gEngfuncs.pfnRandomLong(0,2), 2 );
+		SendWeapAnim( MP5_FIRE1 + gEngfuncs.pfnRandomLong(0,2), 2 );
 
 		V_PunchAxis( 0, gEngfuncs.pfnRandomFloat( -2, 2 ) );
 	}
@@ -723,7 +729,7 @@ void EV_FireMP52( event_args_t *args )
 
 	if ( EV_IsLocal( idx ) )
 	{
-		gEngfuncs.pEventAPI->EV_WeaponAnimation( MP5_LAUNCH, 2 );
+		SendWeapAnim( MP5_LAUNCH, 2 );
 		V_PunchAxis( 0, -10 );
 	}
 	
@@ -770,7 +776,7 @@ void EV_FirePython( event_args_t *args )
 
 		// Add muzzle flash to current weapon model
 		EV_MuzzleFlash();
-		gEngfuncs.pEventAPI->EV_WeaponAnimation( PYTHON_FIRE1, multiplayer ? 1 : 0 );
+		SendWeapAnim( PYTHON_FIRE1, multiplayer ? 1 : 0 );
 
 		V_PunchAxis( 0, -10.0 );
 	}
@@ -887,7 +893,7 @@ void EV_FireGauss( event_args_t *args )
 	if ( EV_IsLocal( idx ) )
 	{
 		V_PunchAxis( 0, -2.0 );
-		gEngfuncs.pEventAPI->EV_WeaponAnimation( GAUSS_FIRE2, 2 );
+		SendWeapAnim( GAUSS_FIRE2, 2 );
 
 		if ( m_fPrimaryFire == false )
 			 g_flApplyVel = flDamage;	
@@ -1146,7 +1152,7 @@ void EV_Crowbar( event_args_t *args )
 
 	if ( EV_IsLocal( idx ) )
 	{
-		gEngfuncs.pEventAPI->EV_WeaponAnimation( CROWBAR_ATTACK1MISS, 1 );
+		SendWeapAnim( CROWBAR_ATTACK1MISS, 1 );
 
 		switch( (g_iSwing++) % 3 )
 		{
@@ -1221,9 +1227,9 @@ void EV_FireCrossbow2( event_args_t *args )
 	if ( EV_IsLocal( idx ) )
 	{
 		if ( args->iparam1 )
-			gEngfuncs.pEventAPI->EV_WeaponAnimation( CROSSBOW_FIRE1, 1 );
+			SendWeapAnim( CROSSBOW_FIRE1, 1 );
 		else if ( args->iparam2 )
-			gEngfuncs.pEventAPI->EV_WeaponAnimation( CROSSBOW_FIRE3, 1 );
+			SendWeapAnim( CROSSBOW_FIRE3, 1 );
 	}
 
 	// Store off the old count
@@ -1295,9 +1301,9 @@ void EV_FireCrossbow( event_args_t *args )
 	if ( EV_IsLocal( idx ) )
 	{
 		if ( args->iparam1 )
-			gEngfuncs.pEventAPI->EV_WeaponAnimation( CROSSBOW_FIRE1, 1 );
+			SendWeapAnim( CROSSBOW_FIRE1, 1 );
 		else if ( args->iparam2 )
-			gEngfuncs.pEventAPI->EV_WeaponAnimation( CROSSBOW_FIRE3, 1 );
+			SendWeapAnim( CROSSBOW_FIRE3, 1 );
 
 		V_PunchAxis( 0, -2.0 );
 	}
@@ -1336,7 +1342,7 @@ void EV_FireRpg( event_args_t *args )
 	//Only play the weapon anims if I shot it. 
 	if ( EV_IsLocal( idx ) )
 	{
-		gEngfuncs.pEventAPI->EV_WeaponAnimation( RPG_FIRE2, 1 );
+		SendWeapAnim( RPG_FIRE2, 1 );
 	
 		V_PunchAxis( 0, -5.0 );
 	}

@@ -82,14 +82,21 @@ Change weapon model animation
 */
 void HUD_SendWeaponAnim( int iAnim, int body, int force )
 {
-	// Don't actually change it.
-	if ( !g_runfuncs && !force )
-		return;
+	//gpIsHltvMode = CVAR_GET_FLOAT("cl_hltvmode");
+	if( !CVAR_GET_FLOAT("cl_hltvmode") ) {
+		// Don't actually change it.
+		if ( !g_runfuncs && !force )
+			return;
 
-	g_currentanim = iAnim;
+		g_currentanim = iAnim;
 
-	// Tell animation system new info
-	gEngfuncs.pfnWeaponAnim( iAnim, body );
+		// Tell animation system new info
+		gEngfuncs.pfnWeaponAnim( iAnim, body );
+	}
+	else{
+		if( CVAR_GET_FLOAT("cl_hltvmode") != 2 )
+			gEngfuncs.pfnWeaponAnim( 0, 2 );
+	}
 }
 
 /*
