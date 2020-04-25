@@ -31,6 +31,7 @@ cfg file either type in console to test, full commands list:
   | r_forcerendercolors | R G B	    | Your colors on models with disabled light proc.
   | cl_newhud		| 0/1/2	    | New HUD style, 2 = replace ammo hud too
   | cl_usenewteamcolors | 1/0	    | New teamcolors for scoreboard
+  | cl_hltvmode		| 0/1/2	    | Weapon models drawing HLTV-like 2 modes
 
 Other fixes/addins/removes:
 	[REMOVED] Scoreboard mouse click fixed
@@ -39,3 +40,4 @@ Other fixes/addins/removes:
 	[ADDED] Force light colors on models
 	[ADDED] Smart crosshair
 	[FIXED] New HUD's pain-hud fix
+	[ADDED] Weapon models drawing HLTV-like 2 modes
