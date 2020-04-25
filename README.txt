@@ -4,6 +4,8 @@ Feel free to use it under AG because it contains all basic AG features
 To install it just extract all from archive into "valve" / "ag" folder,
 agree the replace if needed
 
+Web-site: http://89.19.174.11/sharp/
+
 You can set up this client via console commands, simply put them into your
 cfg file either type in console to test, full commands list:
 
