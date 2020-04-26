@@ -270,6 +270,9 @@
     <ClCompile Include="rezhudvote.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="renderfuncs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="parsemsg.h">
@@ -402,6 +405,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="rezglobal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderfuncs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

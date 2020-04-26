@@ -425,15 +425,8 @@ void CAM_OutUp(void) { KeyUp( &cam_out ); }
 
 void CAM_ToThirdPerson(void)
 { 
-	vec3_t viewangles;
 
-#if !defined( _DEBUG )
-	if ( gEngfuncs.GetMaxClients() > 1 )
-	{
-		// no thirdperson in multiplayer.
-		return;
-	}
-#endif
+	vec3_t viewangles;
 
 	gEngfuncs.GetViewAngles( (float *)viewangles );
 

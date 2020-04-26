@@ -31,7 +31,7 @@
 #include "demo_api.h"
 #include "vgui_scorepanel.h"
 
-int hud_color[3];
+int hud_color[4];
 
 class CHLVoiceStatusHelper : public IVoiceStatusHelper
 {

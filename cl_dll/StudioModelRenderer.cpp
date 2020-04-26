@@ -8,35 +8,17 @@
 // studio_model.cpp
 // routines for setting up to draw 3DStudio models
 
-#include "hud.h"
-#include "cl_util.h"
-#include "const.h"
-#include "com_model.h"
-#include "studio.h"
-#include "entity_state.h"
-#include "cl_entity.h"
-#include "dlight.h"
-#include "triangleapi.h"
+#include "renderfuncs.h"
 #include "pmtrace.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <memory.h>
-#include <math.h>
-#include <Windows.h>
-
 #include "studio_util.h"
-#include "r_studioint.h"
-
-#include "StudioModelRenderer.h"
-#include "GameStudioModelRenderer.h"
 
 // Global engine <-> studio model rendering code interface
 engine_studio_api_t IEngineStudio;
+extern CRenderFuncs gpRenderFuncs;
 
 cvar_s* m_pCvarFakeDrawEntities;
 BOOL bCrosshairMustBeRed = FALSE;
-INT pLightColors[2];
+INT pLightColors[3];
 
 /////////////////////
 // Implementation of CStudioModelRenderer.h
@@ -1390,6 +1372,10 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 	//strcpy( m_pRenderModel->name, "models/player/hgrunt/hgrunt.mdl" );
 	if (m_pRenderModel == NULL)
 		return 0;
+
+	/*if( CVAR_GET_FLOAT("r_glwireframe") == 2 ) {
+		gpRenderFuncs.WireframeForModel( m_pRenderModel );
+	}*/
 
 	m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata (m_pRenderModel);
 	IEngineStudio.StudioSetHeader( m_pStudioHeader );

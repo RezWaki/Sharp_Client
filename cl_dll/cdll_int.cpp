@@ -18,10 +18,9 @@
 // this implementation handles the linking of the engine to the DLL
 //
 
-#include "hud.h"
-#include "cl_util.h"
 #include "netadr.h"
 #include "vgui_schememanager.h"
+#include "renderfuncs.h"
 
 extern "C"
 {
@@ -32,6 +31,9 @@ extern "C"
 #include "hud_servers.h"
 #include "vgui_int.h"
 #include "interface.h"
+#ifdef _DEBUG
+#include <GL\glew.h>
+#endif
 
 #define DLLEXPORT __declspec( dllexport )
 
@@ -139,6 +141,8 @@ void DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server )
 	PM_Move( ppmove, server );
 }
 
+char pClVersionInfo[256];
+
 int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 {
 	gEngfuncs = *pEnginefuncs;
@@ -153,6 +157,19 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	CVAR_CREATE( "cl_crosshair", "1", NULL );
 	CVAR_CREATE( "cl_crosscolor", "255 255 255", NULL );
 	CVAR_CREATE( "cl_crossdotsize", "4", NULL );
+#ifdef _DEBUG
+	CVAR_CREATE( "r_glwireframecolors", "255 0 0 255", NULL );
+	CVAR_CREATE( "r_glwireframewidth", "4", NULL );
+	CVAR_CREATE( "r_glwireframe", "0", NULL );
+	glewInit();
+#endif
+
+	sprintf( pClVersionInfo, "echo Sharp Client Version [%s]", CL_VER );
+	gEngfuncs.pfnClientCmd( "toggleconsole" );
+	gEngfuncs.pfnClientCmd( "clear" );
+	gEngfuncs.pfnClientCmd( pClVersionInfo );
+	gEngfuncs.pfnClientCmd( "echo \"Web-site: http://89.19.174.11/sharp/\"" );
+	gEngfuncs.pfnClientCmd( "echo \"GitHub page: https://github.com/RezWaki/Sharp_Client/\"" );
 
 	EV_HookEvents();
 

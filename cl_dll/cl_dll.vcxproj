@@ -150,6 +150,7 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="renderfuncs.cpp" />
     <ClCompile Include="rezglobal.cpp" />
     <ClCompile Include="rezhudcountdown.cpp" />
     <ClCompile Include="rezhudvote.cpp" />
@@ -240,6 +241,7 @@
     <ClCompile Include="..\game_shared\voice_status.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="renderfuncs.h" />
     <ClInclude Include="rezglobal.h" />
     <ClInclude Include="parsemsg.h" />
     <ClInclude Include="ammo.h" />

@@ -182,8 +182,8 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 }
 
 char pFrags[256], pTeamInfo[256];
-INT pCrossColors[2];
-INT pHudColors[3];
+INT pCrossColors[3];
+INT pHudColors[4];
 
 int CHudHealth::Draw(float flTime)
 {
