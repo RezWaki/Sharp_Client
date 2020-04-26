@@ -43,3 +43,5 @@ Other fixes/addins/removes:
 	[ADDED] Smart crosshair
 	[FIXED] New HUD's pain-hud fix
 	[ADDED] Weapon models drawing HLTV-like 2 modes
+	[FIXED] cl_hudcolor health drawing bug with cl_newhud 0
+	[FIXED] Array-size dependent memory corruption bug
