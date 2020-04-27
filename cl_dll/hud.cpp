@@ -323,13 +323,17 @@ void CHud :: Init( void )
 	CVAR_CREATE( "cl_gaussbeam_color", "150 0 255", NULL );
 	CVAR_CREATE( "r_fakedrawentities", "1", NULL );
 	CVAR_CREATE( "cl_hudweapon", "0", NULL );
-	CVAR_CREATE( "cl_smart_crosshair", "0", NULL );
+	CVAR_CREATE( "cl_smart_crosshair", "1", NULL );
 	CVAR_CREATE( "r_noplayerlights", "0", NULL );
 	CVAR_CREATE( "r_noitemlights", "0", NULL );
 	CVAR_CREATE( "r_forcerendercolors", "0", NULL );
 	CVAR_CREATE( "cl_newhud", "1", NULL );
 	CVAR_CREATE( "cl_usenewteamcolors", "1", NULL );
 	CVAR_CREATE( "cl_hltvmode", "0", NULL );
+	CVAR_CREATE( "r_extrachrome", "1", NULL );
+	CVAR_CREATE( "cl_flashplayer", "0", NULL );
+	CVAR_CREATE( "cl_specwh", "0", NULL );
+	CVAR_CREATE( "cl_viewmodelmode", "0", NULL );
 
 	m_pSpriteList = NULL;
 

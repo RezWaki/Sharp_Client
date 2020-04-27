@@ -11,6 +11,11 @@
 #include "renderfuncs.h"
 #include "pmtrace.h"
 #include "studio_util.h"
+//#include <Windows.h>
+#include <GL\GL.h>
+#include <GL\GLU.h>
+
+#pragma comment( lib, "opengl32.lib" )
 
 // Global engine <-> studio model rendering code interface
 engine_studio_api_t IEngineStudio;
@@ -1041,6 +1046,8 @@ void CStudioModelRenderer::StudioMergeBones ( model_t *m_pSubModel )
 	}
 }
 
+INT pWeapBoxColors[3], iPhase = 0;
+
 /*
 ====================
 StudioDrawModel
@@ -1150,6 +1157,8 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 			lighting.color = Vector(pLightColors[0], pLightColors[1], pLightColors[2]);
 			lighting.ambientlight = 255;
 		}
+
+		//gEngfuncs.pfnCenterPrint( m_pRenderModel->name );
 
 		// model and frame independant
 		IEngineStudio.StudioSetupLighting (&lighting);
@@ -1477,6 +1486,31 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 			lighting.ambientlight = 255;
 		}
 
+		if( CVAR_GET_FLOAT("cl_flashplayer") ) {
+			iPhase++;
+			if( iPhase <= 500 ) {
+				pWeapBoxColors[0] = pWeapBoxColors[1] = pWeapBoxColors[2] = 255;
+			}
+			else if( iPhase > 500 && iPhase <= 1000 ) {
+				pWeapBoxColors[0] = 255;
+				pWeapBoxColors[1] = pWeapBoxColors[2] = 0;
+			}
+			else if( iPhase > 1000 ) iPhase = 0;
+			lighting.color = Vector( pWeapBoxColors[0], pWeapBoxColors[1], pWeapBoxColors[2] );
+		}
+
+		if( CVAR_GET_FLOAT("cl_specwh") && gEngfuncs.GetLocalPlayer()->curstate.spectator ) {
+			if( CVAR_GET_FLOAT("cl_flashplayer") ) gEngfuncs.Cvar_SetValue( "cl_flashplayer", 0.0 );
+			if( CVAR_GET_FLOAT("r_forcerendercolors") != 0 ) gEngfuncs.Cvar_SetValue( "r_forcerendercolors", 0 );
+			pTracePlayer = gEngfuncs.PM_TraceLine( gEngfuncs.GetLocalPlayer()->origin, m_pCurrentEntity->origin, 1, 2, -1 );
+			if( pTracePlayer->fraction == 1.0 ) {
+				lighting.color = Vector( 0, 255, 0 ); //visible = green
+			}
+			else{
+				lighting.color = Vector( 255, 0, 0 ); //invisible = red
+			}
+		}
+
 		// model and frame independant
 		IEngineStudio.StudioSetupLighting (&lighting);
 
@@ -1566,6 +1600,8 @@ void CStudioModelRenderer::StudioCalcAttachments( void )
 	}
 }
 
+int modelZpos = 0, iStep = 0, iTurn = 0;
+
 /*
 ====================
 StudioRenderModel
@@ -1574,28 +1610,32 @@ StudioRenderModel
 */
 void CStudioModelRenderer::StudioRenderModel( void )
 {
-	IEngineStudio.SetChromeOrigin();
-	IEngineStudio.SetForceFaceFlags( 0 );
+	if( !CVAR_GET_FLOAT("r_extrachrome") ) {
+		IEngineStudio.SetChromeOrigin();
+		IEngineStudio.SetForceFaceFlags( 0 );
 
-	if ( m_pCurrentEntity->curstate.renderfx == kRenderFxGlowShell )
-	{
-		m_pCurrentEntity->curstate.renderfx = kRenderFxNone;
-		StudioRenderFinal( );
+		if ( m_pCurrentEntity->curstate.renderfx == kRenderFxGlowShell )
+		{
+			m_pCurrentEntity->curstate.renderfx = kRenderFxNone;
+			StudioRenderFinal( );
 		
-		if ( !IEngineStudio.IsHardware() )
-		{
-			gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+			if ( !IEngineStudio.IsHardware() )
+			{
+				gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+			}
+			IEngineStudio.SetForceFaceFlags( STUDIO_NF_CHROME );
+			gEngfuncs.pTriAPI->SpriteTexture( m_pChromeSprite, 0 );
+			m_pCurrentEntity->curstate.renderfx = kRenderFxGlowShell;
+
+			StudioRenderFinal( );
+			if ( !IEngineStudio.IsHardware() )
+			{
+				gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
+			}
 		}
-
-		IEngineStudio.SetForceFaceFlags( STUDIO_NF_CHROME );
-
-		gEngfuncs.pTriAPI->SpriteTexture( m_pChromeSprite, 0 );
-		m_pCurrentEntity->curstate.renderfx = kRenderFxGlowShell;
-
-		StudioRenderFinal( );
-		if ( !IEngineStudio.IsHardware() )
+		else
 		{
-			gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
+			StudioRenderFinal( );
 		}
 	}
 	else
@@ -1649,6 +1689,9 @@ void CStudioModelRenderer::StudioRenderFinal_Software( void )
 	IEngineStudio.RestoreRenderer();
 }
 
+color24 pWeapRenderColors;
+INT iPlus = 1;
+
 /*
 ====================
 StudioRenderFinal_Hardware
@@ -1685,7 +1728,7 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware( void )
 
 			IEngineStudio.GL_SetRenderMode( rendermode );
 			IEngineStudio.StudioDrawPoints();
-			IEngineStudio.GL_StudioDrawShadow();
+			//IEngineStudio.GL_StudioDrawShadow();
 		}
 	}
 
@@ -1694,6 +1737,16 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware( void )
 		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 		IEngineStudio.StudioDrawHulls( );
 		gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
+	}
+
+	if( CVAR_GET_FLOAT("cl_specwh") && gEngfuncs.GetLocalPlayer()->curstate.spectator ) {
+		glDepthRange( 0.0, 0.5 );
+	}
+	if( CVAR_GET_FLOAT("r_extrachrome") == 2 ) {
+		gEngfuncs.GetViewModel()->curstate.renderfx = kRenderFxGlowShell;
+	}
+	else{
+		gEngfuncs.GetViewModel()->curstate.renderfx = kRenderFxNone;
 	}
 
 	IEngineStudio.RestoreRenderer();

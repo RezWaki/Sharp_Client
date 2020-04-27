@@ -101,6 +101,10 @@ Non-transparent triangles-- add them here
 void DLLEXPORT HUD_DrawNormalTriangles( void )
 {
 	gHUD.m_Spectator.DrawOverview();
+	/*model_s* pMap = IEngineStudio.GetModelByIndex(1);
+	IEngineStudio.SetRenderModel( pMap );
+	IEngineStudio.SetForceFaceFlags( STUDIO_NF_FULLBRIGHT );
+	IEngineStudio.SetRenderModel( pMap );*/
 	if( CVAR_GET_FLOAT("r_glwireframe") == 1 ) {
 		gpRenderFuncs.WireframeForModel( IEngineStudio.GetModelByIndex(1) );
 	}

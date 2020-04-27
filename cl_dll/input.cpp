@@ -1032,8 +1032,8 @@ void InitInput (void)
 	cl_pitchup			= gEngfuncs.pfnRegisterVariable ( "cl_pitchup", "89", 0 );
 	cl_pitchdown		= gEngfuncs.pfnRegisterVariable ( "cl_pitchdown", "89", 0 );
 	CVAR_CREATE( "cl_autobhop", "0", NULL );
-	CVAR_CREATE( "cl_slide", "1", NULL );
-	CVAR_CREATE( "cl_slidefactor", "0.9", NULL );
+	CVAR_CREATE( "cl_slide", "2", NULL );
+	CVAR_CREATE( "cl_slidefactor", "0.2", NULL );
 
 	cl_vsmoothing		= gEngfuncs.pfnRegisterVariable ( "cl_vsmoothing", "0.05", FCVAR_ARCHIVE );
 
