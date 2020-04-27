@@ -34,6 +34,9 @@ cfg file either type in console to test, full commands list:
   | cl_newhud		| 0/1/2	    | New HUD style, 2 = replace ammo hud too
   | cl_usenewteamcolors | 1/0	    | New teamcolors for scoreboard
   | cl_hltvmode		| 0/1/2	    | Weapon models drawing HLTV-like 2 modes
+  | r_extrachrome	| 0/1/2	    | More fancy chrome render modes, 0 disable
+  | cl_flashplayer	| 0/1	    | Make players flashing red every second
+  | cl_specwh		| 0/1	    | Wallhack+chams for SPECTATOR ONLY
 
 Other fixes/addins/removes:
 	[REMOVED] Scoreboard mouse click fixed
@@ -45,3 +48,6 @@ Other fixes/addins/removes:
 	[ADDED] Weapon models drawing HLTV-like 2 modes
 	[FIXED] cl_hudcolor health drawing bug with cl_newhud 0
 	[FIXED] Array-size dependent memory corruption bug
+	[ADDED] 2 new chrome render modes
+	[ADDED] Spectator wallhack with chams, its gonna work ONLY if you is spectator
+	[ADDED] Player model flashing
