@@ -37,6 +37,7 @@ cfg file either type in console to test, full commands list:
   | r_extrachrome	| 0/1/2	    | More fancy chrome render modes, 0 disable
   | cl_flashplayer	| 0/1	    | Make players flashing red every second
   | cl_specwh		| 0/1	    | Wallhack+chams for SPECTATOR ONLY
+  | cl_itemtimer	| 0/1	    | Weapons & items next-spawn timer
 
 Other fixes/addins/removes:
 	[REMOVED] Scoreboard mouse click fixed
@@ -51,3 +52,4 @@ Other fixes/addins/removes:
 	[ADDED] 2 new chrome render modes
 	[ADDED] Spectator wallhack with chams, its gonna work ONLY if you is spectator
 	[ADDED] Player model flashing
+	[ADDED] Weapons & items next-spawn timer
