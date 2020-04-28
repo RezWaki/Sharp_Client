@@ -64,6 +64,8 @@ void HistoryResource :: AddToHistory( int iType, int iId, int iCount )
 }
 
 std::string pItemName;
+int pShouldDrawTimer = FALSE;
+float pTimerSeconds = 20.0;
 
 void HistoryResource :: AddToHistory( int iType, const char *szName, int iCount )
 {
@@ -107,6 +109,7 @@ void HistoryResource :: CheckClearHistory( void )
 }
 
 int m_flTurnoff = 0;
+//int iHudTimerPos = ScreenHeight/6;
 
 //
 // Draw Ammo pickup history
@@ -153,6 +156,11 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				if ( !weap )
 					return 1;  // we don't know about the weapon yet, so don't draw anything
 
+				if( CVAR_GET_FLOAT("cl_itemtimer") && !pShouldDrawTimer ) { //isnt counting something else
+					pTimerSeconds = 20.0; //weapon 20 sec
+					pShouldDrawTimer = TRUE;
+				}
+
 				int r, g, b;
 				UnpackRGB(r,g,b, RGB_YELLOWISH);
 
@@ -173,6 +181,11 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 
 				if ( !rgAmmoHistory[i].iId )
 					continue;  // sprite not loaded
+
+				if( CVAR_GET_FLOAT("cl_itemtimer") && !pShouldDrawTimer ) { //isnt counting something else
+						pTimerSeconds = 30.0; //sweeties 30 sec
+						pShouldDrawTimer = TRUE;
+				}
 
 				wrect_t rect = gHUD.GetSpriteRect( rgAmmoHistory[i].iId );
 

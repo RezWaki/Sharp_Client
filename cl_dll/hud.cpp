@@ -333,7 +333,7 @@ void CHud :: Init( void )
 	CVAR_CREATE( "r_extrachrome", "1", NULL );
 	CVAR_CREATE( "cl_flashplayer", "0", NULL );
 	CVAR_CREATE( "cl_specwh", "0", NULL );
-	CVAR_CREATE( "cl_viewmodelmode", "0", NULL );
+	CVAR_CREATE( "cl_itemtimer", "0", NULL );
 
 	m_pSpriteList = NULL;
 

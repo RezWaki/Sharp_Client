@@ -12,9 +12,9 @@
 #include "GameStudioModelRenderer.h"
 #include <Windows.h>
 #include <vector>
-//#ifndef _DEBUG
+#ifdef _DEBUG
 #include <GL\glew.h>
-//#endif
+#endif
 
 /*
 #include "hud.h"
@@ -41,9 +41,9 @@
 #include "GameStudioModelRenderer.h"
 */
 
-#define CL_VER "6.0"
+#define CL_VER "7.0"
 
-#ifndef _DEBUG
+#ifdef _DEBUG
 #pragma comment( lib, "opengl32.lib" )
 #pragma comment( lib, "glew32.lib" )
 #endif //glew?? dont need if its release

@@ -29,6 +29,9 @@
 #include <Windows.h>
 
 extern BOOL bCrosshairMustBeRed;
+extern int pShouldDrawTimer;
+extern float pTimerSeconds;
+//extern int iHudTimerPos;
 extern extra_player_info_t  g_PlayerExtraInfo[MAX_PLAYERS+1];
 
 DECLARE_MESSAGE(m_Health, Health )
@@ -181,15 +184,35 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 #endif 
 }
 
-char pFrags[256], pTeamInfo[256];
+char pFrags[256], pTeamInfo[256], pTimerInfo[256];
 INT pCrossColors[3];
 INT pHudColors[4];
+FLOAT iClTime = 0.0, bFirst = 1;
 
 int CHudHealth::Draw(float flTime)
 {
 	int r, g, b;
 	int a = 0, x, y;
 	int HealthWidth;
+
+	if( pShouldDrawTimer && CVAR_GET_FLOAT("cl_itemtimer") ) {
+		if( bFirst ) {
+			iClTime = gEngfuncs.GetClientTime();
+			bFirst = FALSE;
+		}
+		if( gEngfuncs.GetClientTime() < iClTime+pTimerSeconds ) {
+			sprintf( pTimerInfo, "Respawn in: %i seconds", (INT)((iClTime+pTimerSeconds)-gEngfuncs.GetClientTime()) );
+			if( !(INT)((iClTime+pTimerSeconds)-gEngfuncs.GetClientTime()) ) {
+				strcpy( pTimerInfo, "Item spawned!" );
+			}
+			gEngfuncs.pfnDrawSetTextColor( pHudColors[0]/255, pHudColors[1]/255, pHudColors[2]/255 );
+			gEngfuncs.pfnDrawConsoleString( ScreenWidth/2, ScreenHeight/6, pTimerInfo );
+		}
+		else if( gEngfuncs.GetClientTime() > iClTime+pTimerSeconds ) {
+			bFirst = TRUE;
+			pShouldDrawTimer = FALSE;
+		}
+	}
 
 	sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i %i", &pHudColors[0], &pHudColors[1], &pHudColors[2], &pHudColors[3] );
 	if( CVAR_GET_FLOAT("cl_newhud") ) {

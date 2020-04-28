@@ -6,6 +6,7 @@ void CRenderFuncs::WireframeForModel( model_s* mdl ) {
 #ifndef _DEBUG
 	return;
 #endif
+#ifdef _DEBUG
 	sscanf( CVAR_GET_STRING("r_glwireframecolors"), "%i %i %i %i", &pWireColor[0], &pWireColor[1], &pWireColor[2], &pWireColor[3] );
     if( mdl == NULL )
         return;
@@ -30,6 +31,7 @@ void CRenderFuncs::WireframeForModel( model_s* mdl ) {
 	glVertexPointer( 3, GL_FLOAT, 0, &pVertexOrigins[0] );
 	glDrawArrays( GL_LINES, 0, mdl->numedges*2 );
 	pVertexOrigins.clear();
+#endif
 }
 
 CRenderFuncs gpRenderFuncs;
