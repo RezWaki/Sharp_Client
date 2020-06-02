@@ -1,10 +1,11 @@
-SharpClient is client library for Half-Life / Adrenaline Gamer mod
+==- SHARP CLIENT -==
+    update v8.0
+
+This is client library for Half-Life / Adrenaline Gamer mod
 Feel free to use it under AG because it contains all basic AG features
 
 To install it just extract all from archive into "valve" / "ag" folder,
 agree the replace if needed
-
-Web-site: http://89.19.174.11/sharp/
 
 You can set up this client via console commands, simply put them into your
 cfg file either type in console to test, full commands list:
@@ -38,6 +39,7 @@ cfg file either type in console to test, full commands list:
   | cl_flashplayer	| 0/1	    | Make players flashing red every second
   | cl_specwh		| 0/1	    | Wallhack+chams for SPECTATOR ONLY
   | cl_itemtimer	| 0/1	    | Weapons & items next-spawn timer
+  | cl_rainbowhud	| 0/1/2	    | Rainbow color hud changer 2 modes
 
 Other fixes/addins/removes:
 	[REMOVED] Scoreboard mouse click fixed
@@ -53,3 +55,4 @@ Other fixes/addins/removes:
 	[ADDED] Spectator wallhack with chams, its gonna work ONLY if you is spectator
 	[ADDED] Player model flashing
 	[ADDED] Weapons & items next-spawn timer
+	[ADDED] Rainbow color hud changer
