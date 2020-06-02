@@ -23,6 +23,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <ctime>
 
 #include "ammohistory.h"
 
@@ -111,6 +112,12 @@ void HistoryResource :: CheckClearHistory( void )
 int m_flTurnoff = 0;
 //int iHudTimerPos = ScreenHeight/6;
 
+int hudColors_random[5][3] = {85, 0, 255,
+							  255, 0, 0,
+							  0, 255, 0,
+							  255, 255, 0,
+							  255, 255, 255};
+
 //
 // Draw Ammo pickup history
 //
@@ -147,6 +154,13 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				}
 
 				// Draw the number
+				if( CVAR_GET_FLOAT("cl_rainbowhud") > 0 ) {
+					srand( time(NULL) );
+					int tempcolor = rand()%5;
+					r = hudColors_random[tempcolor][0];
+					g = hudColors_random[tempcolor][1];
+					b = hudColors_random[tempcolor][2];
+				}
 				gHUD.DrawHudNumberString( xpos - 10, ypos, xpos - 100, rgAmmoHistory[i].iCount, r, g, b );
 			}
 			else if ( rgAmmoHistory[i].type == HISTSLOT_WEAP )
@@ -164,11 +178,21 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				int r, g, b;
 				UnpackRGB(r,g,b, RGB_YELLOWISH);
 
-				if ( !gWR.HasAmmo( weap ) )
+				if( CVAR_GET_FLOAT("cl_rainbowhud") == 2 ) {
+					srand( time(NULL) );
+					int tempcolor = rand()%3;
+					r = hudColors_random[tempcolor][0];
+					g = hudColors_random[tempcolor][1];
+					b = hudColors_random[tempcolor][2];
+				}
+
+				if ( !gWR.HasAmmo( weap ) && !CVAR_GET_FLOAT("cl_rainbowhud") )
 					UnpackRGB(r,g,b, RGB_REDISH);	// if the weapon doesn't have ammo, display it as red
 
-				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-				ScaleColors(r, g, b, min(scale, 255) );
+				//if( !CVAR_GET_FLOAT("cl_rainbowhud") ) {
+					float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
+					ScaleColors(r, g, b, min(scale, 255) );
+				//}
 
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
 				int xpos = ScreenWidth - (weap->rcInactive.right - weap->rcInactive.left);
@@ -189,9 +213,19 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 
 				wrect_t rect = gHUD.GetSpriteRect( rgAmmoHistory[i].iId );
 
-				UnpackRGB(r,g,b, RGB_YELLOWISH);
-				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-				ScaleColors(r, g, b, min(scale, 255) );
+				if( !CVAR_GET_FLOAT("cl_rainbowhud") ) {
+					UnpackRGB(r,g,b, RGB_YELLOWISH);
+					float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
+					ScaleColors(r, g, b, min(scale, 255) );
+				}
+
+				if( CVAR_GET_FLOAT("cl_rainbowhud") == 2 ) {
+					srand( time(NULL) );
+					int tempcolor = rand()%3;
+					r = hudColors_random[tempcolor][0];
+					g = hudColors_random[tempcolor][1];
+					b = hudColors_random[tempcolor][2];
+				}
 
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
 				int xpos = ScreenWidth - (rect.right - rect.left) - 10;
@@ -202,8 +236,5 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 		}
 	}
 
-
 	return 1;
 }
-
-

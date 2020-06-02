@@ -334,6 +334,7 @@ void CHud :: Init( void )
 	CVAR_CREATE( "cl_flashplayer", "0", NULL );
 	CVAR_CREATE( "cl_specwh", "0", NULL );
 	CVAR_CREATE( "cl_itemtimer", "0", NULL );
+	CVAR_CREATE( "cl_rainbowhud", "0", NULL );
 
 	m_pSpriteList = NULL;
 

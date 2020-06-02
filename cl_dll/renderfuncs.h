@@ -41,7 +41,7 @@
 #include "GameStudioModelRenderer.h"
 */
 
-#define CL_VER "7.0"
+#define CL_VER "8.0"
 
 #ifdef _DEBUG
 #pragma comment( lib, "opengl32.lib" )
