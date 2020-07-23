@@ -1,5 +1,5 @@
 ==- SHARP CLIENT -==
-    update v8.0
+    update v9.0
 
 This is client library for Half-Life / Adrenaline Gamer mod
 Feel free to use it under AG because it contains all basic AG features
@@ -40,6 +40,11 @@ cfg file either type in console to test, full commands list:
   | cl_specwh		| 0/1	    | Wallhack+chams for SPECTATOR ONLY
   | cl_itemtimer	| 0/1	    | Weapons & items next-spawn timer
   | cl_rainbowhud	| 0/1/2	    | Rainbow color hud changer 2 modes
+  | cl_spechud		| 0/1/2	    | Toggle spectator hud, 1 = duel, 2 = teamplay
+  | cl_specbk		| 0/string  | Sprite background for spec duel hud (never tested)
+  | cl_specplayers	| int int   | Type here indexes (NOT userids) for players
+  | cl_spechud_offset	| integer   | Enter here Y-axis offset for teamplay spechud
+  | cl_damagepunch	| 0/1	    | Toggle punch-effect when getting damage
 
 Other fixes/addins/removes:
 	[REMOVED] Scoreboard mouse click fixed
@@ -56,3 +61,6 @@ Other fixes/addins/removes:
 	[ADDED] Player model flashing
 	[ADDED] Weapons & items next-spawn timer
 	[ADDED] Rainbow color hud changer
+	[ADDED] Spectator HUD with 2 modes, for more details read spechud.txt
+	[ADDED] Screen punch-effect when getting damage
+	[FIXED] cl_newhud 2 ammo hud's "0" problem fixed
