@@ -4,7 +4,7 @@
 This is client library for Half-Life / Adrenaline Gamer mod
 Feel free to use it under AG because it contains all basic AG features
 
-To install it just extract all from archive into "valve" / "ag" folder,
+To install it just extract all from archive into "valve\cl_dlls" / "ag\cl_dlls" folder,
 agree the replace if needed
 
 You can set up this client via console commands, simply put them into your
