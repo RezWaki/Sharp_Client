@@ -253,7 +253,9 @@ bool HACK_GetPlayerUniqueID( int iPlayer, char playerID[16] )
 {
 	return !!gEngfuncs.GetPlayerUniqueID( iPlayer, playerID );
 }
-		
+
+int iScoreOffsets[2], iScoreBounds[2];
+
 //-----------------------------------------------------------------------------
 // Purpose: Recalculate the internal scoreboard data
 //-----------------------------------------------------------------------------
@@ -312,6 +314,12 @@ void ScorePanel::Update()
 				pTeamColors[i][j] = iTeamColors[i][j];
 			}
 		}
+	}
+	if( gEngfuncs.CheckParm("-allowcustomscorepanel", NULL) ) {
+		sscanf( CVAR_GET_STRING("cl_scorepanel_offsets"), "%i %i", &iScoreOffsets[0], &iScoreOffsets[1] );
+		//sscanf( CVAR_GET_STRING("cl_scorepanel_bounds"), "%i %i", &iScoreBounds[0], &iScoreBounds[1] );
+		//this->setBounds( (ScreenWidth/2)+iScoreOffsets[0], (ScreenHeight/2)+iScoreOffsets[1], iScoreBounds[0], iScoreBounds[1] );
+		this->setPos( (ScreenWidth/6)+iScoreOffsets[0], (ScreenHeight/10)+iScoreOffsets[1] );
 	}
 }
 

@@ -41,7 +41,7 @@
 #include "GameStudioModelRenderer.h"
 */
 
-#define CL_VER "8.0"
+#define CL_VER "9.0"
 
 #ifdef _DEBUG
 #pragma comment( lib, "opengl32.lib" )
@@ -52,6 +52,11 @@ class CRenderFuncs{
 	private:
 		INT pWireColor[4];
 		std::vector<float> pVertexOrigins;
+		std::string pModelName;
+		char pModelPath[256];
+		char pNewModelPath[256];
+		INT pCounter;
 	public:
+		char* GetRealModelPath( char* input );
 		void WireframeForModel( model_s* mdl );
 };

@@ -76,6 +76,7 @@ void SpectatorPanel::ActionSignal(int cmd)
 
 void SpectatorPanel::Initialize()
 {
+	if( CVAR_GET_FLOAT("cl_spechud") ) return;
 	int x,y,wide,tall;
 	
 	getBounds(x,y,wide,tall);

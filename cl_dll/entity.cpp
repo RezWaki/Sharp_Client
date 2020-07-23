@@ -223,7 +223,6 @@ void DLLEXPORT HUD_TxferPredictionData ( struct entity_state_s *ps, const struct
 		pcd->iuser1 = g_iUser1;	// observer mode
 		pcd->iuser2 = g_iUser2; // first target
 		pcd->iuser3 = g_iUser3; // second target
-
 	}
 
 	// Fire prevention

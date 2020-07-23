@@ -860,9 +860,12 @@ int CHudAmmo::Draw(float flTime)
 
 	sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i %i", &r, &g, &b, &a );
 	if( CVAR_GET_FLOAT("cl_newhud") == 2 ) {
-		gHUD.DrawHudNumber( ScreenWidth-gHUD.m_scrinfo.iCharHeight*6, ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, DHN_3DIGITS | DHN_DRAWZERO, gWR.CountAmmo(pw->iAmmo2Type), r, g, b );
-		gHUD.DrawHudNumber( ScreenWidth-gHUD.m_scrinfo.iCharHeight*8, ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, DHN_3DIGITS | DHN_DRAWZERO, gWR.CountAmmo(pw->iAmmoType), r, g, b );
-		gHUD.DrawHudNumber( ScreenWidth-gHUD.m_scrinfo.iCharHeight*12, ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, DHN_3DIGITS | DHN_DRAWZERO, pw->iClip, r, g, b );
+		if( gWR.CountAmmo(pw->iAmmo2Type) > 0 )
+			gHUD.DrawHudNumber( ScreenWidth-gHUD.m_scrinfo.iCharHeight*6, ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, DHN_3DIGITS | DHN_DRAWZERO, gWR.CountAmmo(pw->iAmmo2Type), r, g, b );
+		if( gWR.CountAmmo(pw->iAmmoType) > 0 )
+			gHUD.DrawHudNumber( ScreenWidth-gHUD.m_scrinfo.iCharHeight*8, ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, DHN_3DIGITS | DHN_DRAWZERO, gWR.CountAmmo(pw->iAmmoType), r, g, b );
+		if( pw->iClip > 0 )
+			gHUD.DrawHudNumber( ScreenWidth-gHUD.m_scrinfo.iCharHeight*12, ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, DHN_3DIGITS | DHN_DRAWZERO, pw->iClip, r, g, b );
 	}
 
 	if( CVAR_GET_FLOAT("cl_newhud") != 2 ) {

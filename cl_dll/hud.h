@@ -726,4 +726,3 @@ extern int g_iTeamNumber;
 extern int g_iUser1;
 extern int g_iUser2;
 extern int g_iUser3;
-

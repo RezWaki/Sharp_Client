@@ -23,6 +23,7 @@ extern CRenderFuncs gpRenderFuncs;
 
 cvar_s* m_pCvarFakeDrawEntities;
 BOOL bCrosshairMustBeRed = FALSE;
+BOOL bAmISpec = FALSE;
 INT pLightColors[3];
 
 /////////////////////
@@ -1498,6 +1499,8 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 			else if( iPhase > 1000 ) iPhase = 0;
 			lighting.color = Vector( pWeapBoxColors[0], pWeapBoxColors[1], pWeapBoxColors[2] );
 		}
+
+		bAmISpec = gEngfuncs.GetLocalPlayer()->curstate.spectator;
 
 		if( CVAR_GET_FLOAT("cl_specwh") && gEngfuncs.GetLocalPlayer()->curstate.spectator ) {
 			if( CVAR_GET_FLOAT("cl_flashplayer") ) gEngfuncs.Cvar_SetValue( "cl_flashplayer", 0.0 );

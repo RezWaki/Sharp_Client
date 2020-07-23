@@ -88,6 +88,7 @@ int CHud :: MsgFunc_Damage(const char *pszName, int iSize, void *pbuf )
 {
 	int		armor, blood;
 	Vector	from;
+	Vector	vwangles;
 	int		i;
 	float	count;
 	

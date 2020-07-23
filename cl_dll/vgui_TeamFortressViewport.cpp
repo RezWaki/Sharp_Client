@@ -1391,7 +1391,9 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 	m_iUser1 = g_iUser1;
 	m_iUser2 = g_iUser2;
 	m_iUser3 = g_iUser3;
-		
+
+	if( CVAR_GET_FLOAT("cl_spechud") ) return;
+
 	if (!m_pSpectatorPanel)
 		return;
 

@@ -66,6 +66,7 @@ public:
 	CImageLabel		*m_TimerImage;
 	Label			*m_CurrentTime;
 	Label			*m_ExtraInfo;
+	Label			*m_SpecHudInfo[2];
 	Panel			*m_Separator;
 
 	Label			*m_TeamScores[TEAM_NUMBER];

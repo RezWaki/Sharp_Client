@@ -157,6 +157,14 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	CVAR_CREATE( "cl_crosshair", "1", NULL );
 	CVAR_CREATE( "cl_crosscolor", "255 255 255", NULL );
 	CVAR_CREATE( "cl_crossdotsize", "4", NULL );
+	CVAR_CREATE( "cl_spechud", "0", NULL );
+	CVAR_CREATE( "cl_specbk", "0", NULL );
+	CVAR_CREATE( "cl_specplayers", "1 2", NULL );
+	CVAR_CREATE( "cl_specteams", "1 2", NULL );
+	CVAR_CREATE( "cl_scorepanel_offsets", "0 0", NULL );
+	CVAR_CREATE( "cl_spechud_offset", "128", NULL );
+	CVAR_CREATE( "cl_damagepunch", "0", NULL );
+	//CVAR_CREATE( "cl_scorepanel_bounds", "512 512", NULL );
 #ifdef _DEBUG
 	CVAR_CREATE( "r_glwireframecolors", "255 0 0 255", NULL );
 	CVAR_CREATE( "r_glwireframewidth", "4", NULL );
