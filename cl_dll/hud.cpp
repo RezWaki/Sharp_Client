@@ -315,26 +315,6 @@ void CHud :: Init( void )
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
 	cl_lw = gEngfuncs.pfnGetCvarPointer( "cl_lw" );
-	CVAR_CREATE( "cl_scorecolor", "105 155 155 200", NULL );
-	CVAR_CREATE( "cl_scorehighlight", "2", NULL );
-	CVAR_CREATE( "cl_hudcolorforname", "0", NULL );
-	CVAR_CREATE( "cl_hudcolor", "255 0 0 255", NULL );
-	CVAR_CREATE( "cl_vote_defaultpos", "1", NULL );
-	CVAR_CREATE( "cl_gaussbeam_color", "150 0 255", NULL );
-	CVAR_CREATE( "r_fakedrawentities", "1", NULL );
-	CVAR_CREATE( "cl_hudweapon", "0", NULL );
-	CVAR_CREATE( "cl_smart_crosshair", "1", NULL );
-	CVAR_CREATE( "r_noplayerlights", "0", NULL );
-	CVAR_CREATE( "r_noitemlights", "0", NULL );
-	CVAR_CREATE( "r_forcerendercolors", "0", NULL );
-	CVAR_CREATE( "cl_newhud", "1", NULL );
-	CVAR_CREATE( "cl_usenewteamcolors", "1", NULL );
-	CVAR_CREATE( "cl_hltvmode", "0", NULL );
-	CVAR_CREATE( "r_extrachrome", "1", NULL );
-	CVAR_CREATE( "cl_flashplayer", "0", NULL );
-	CVAR_CREATE( "cl_specwh", "0", NULL );
-	CVAR_CREATE( "cl_itemtimer", "0", NULL );
-	CVAR_CREATE( "cl_rainbowhud", "0", NULL );
 
 	m_pSpriteList = NULL;
 

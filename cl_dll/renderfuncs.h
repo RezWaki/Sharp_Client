@@ -16,32 +16,7 @@
 #include <GL\glew.h>
 #endif
 
-/*
-#include "hud.h"
-#include "cl_util.h"
-#include "const.h"
-#include "com_model.h"
-#include "studio.h"
-#include "entity_state.h"
-#include "cl_entity.h"
-#include "dlight.h"
-#include "triangleapi.h"
-#include "pmtrace.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <memory.h>
-#include <math.h>
-#include <Windows.h>
-
-#include "studio_util.h"
-#include "r_studioint.h"
-
-#include "StudioModelRenderer.h"
-#include "GameStudioModelRenderer.h"
-*/
-
-#define CL_VER "9.0"
+#define CL_VER "10.0"
 
 #ifdef _DEBUG
 #pragma comment( lib, "opengl32.lib" )
@@ -59,4 +34,6 @@ class CRenderFuncs{
 	public:
 		char* GetRealModelPath( char* input );
 		void WireframeForModel( model_s* mdl );
+		INT* ReadBitmapArray( const char* file, INT width, INT height );
+		void DrawBmpImage( const char* file, INT x, INT y );
 };

@@ -76,25 +76,26 @@ void SpectatorPanel::ActionSignal(int cmd)
 
 void SpectatorPanel::Initialize()
 {
-	if( CVAR_GET_FLOAT("cl_spechud") ) return;
-	int x,y,wide,tall;
+	int x,y,wide,tall,trans;
 	
+	//if( CVAR_GET_FLOAT("cl_spechud") > 0 )
+		trans = 255;
+	//else
+	//	trans = 100;
+
 	getBounds(x,y,wide,tall);
 
 	CSchemeManager * pSchemes = gViewPort->GetSchemeManager();
 
 	SchemeHandle_t hSmallScheme = pSchemes->getSchemeHandle( "Team Info Text" );
-	
-	m_TopBorder = new CTransparentPanel(64, 0, 0, ScreenWidth, YRES(PANEL_HEIGHT));
-	m_TopBorder->setParent(this);
 
-	m_BottomBorder = new CTransparentPanel(64, 0, ScreenHeight - YRES(32), ScreenWidth, YRES(PANEL_HEIGHT));
+	m_BottomBorder = new CTransparentPanel(trans, 0, ScreenHeight - YRES(32), ScreenWidth, YRES(PANEL_HEIGHT));
 	m_BottomBorder->setParent(this);
 
 	setPaintBackgroundEnabled(false);
 
 	m_ExtraInfo = new Label( "Extra Info", 0, 0, wide, YRES(PANEL_HEIGHT) );
-	m_ExtraInfo->setParent(m_TopBorder);
+	m_ExtraInfo->setParent(this);
 	m_ExtraInfo->setFont( pSchemes->getFont(hSmallScheme) );
 
 	m_ExtraInfo->setPaintBackgroundEnabled(false);
@@ -104,27 +105,27 @@ void SpectatorPanel::Initialize()
 	
 
 	m_TimerImage = new CImageLabel( "timer", 0, 0, 14, 14 );
-	m_TimerImage->setParent(m_TopBorder);
+	m_TimerImage->setParent(this);
 
 	m_TopBanner = new CImageLabel( "banner", 0, 0, XRES(BANNER_WIDTH), YRES(BANNER_HEIGHT) );
 	m_TopBanner->setParent(this);
 
 	m_CurrentTime = new Label( "00:00", 0, 0, wide, YRES(PANEL_HEIGHT) );
-	m_CurrentTime->setParent(m_TopBorder);
+	m_CurrentTime->setParent(this);
 	m_CurrentTime->setFont( pSchemes->getFont(hSmallScheme) );
 	m_CurrentTime->setPaintBackgroundEnabled(false);
 	m_CurrentTime->setFgColor( 143, 143, 54, 0 );
 	m_CurrentTime->setContentAlignment( vgui::Label::a_west );
 
 	m_Separator = new Panel( 0, 0, XRES( 64 ), YRES( 96 ));
-	m_Separator->setParent( m_TopBorder );
+	m_Separator->setParent( this );
 	m_Separator->setFgColor( 59, 58, 34, 48 );
 	m_Separator->setBgColor( 59, 58, 34, 48 );
 	
 	for ( int j= 0; j < TEAM_NUMBER; j++ )
 	{
 		m_TeamScores[j] = new Label( "   ", 0, 0, wide, YRES(PANEL_HEIGHT) );
-		m_TeamScores[j]->setParent( m_TopBorder );
+		m_TeamScores[j]->setParent( this );
 		m_TeamScores[j]->setFont( pSchemes->getFont(hSmallScheme) );
 		m_TeamScores[j]->setPaintBackgroundEnabled(false);
 		m_TeamScores[j]->setFgColor( 143, 143, 54, 0 );
@@ -135,7 +136,7 @@ void SpectatorPanel::Initialize()
 	
 	// Initialize command buttons.
 	m_OptionButton = new ColorButton( CHudTextMessage::BufferedLocaliseTextString( "#SPECT_OPTIONS" ), XRES(15), YRES(6), XRES(OPTIONS_BUTTON_X), YRES(20), false, false );
-	m_OptionButton->setParent( m_BottomBorder );
+	m_OptionButton->setParent( this );
 	m_OptionButton->setContentAlignment( vgui::Label::a_center );
 	m_OptionButton->setBoundKey( (char)255 );	// special no bound to avoid leading spaces in name 
 	m_OptionButton->addActionSignal( new CSpectatorHandler_Command(this,SPECTATOR_PANEL_CMD_OPTIONS) );
@@ -145,7 +146,7 @@ void SpectatorPanel::Initialize()
 	m_OptionButton->setArmedColor ( 194, 202, 54, 0 );
 
 	m_CamButton = new ColorButton( CHudTextMessage::BufferedLocaliseTextString( "#CAM_OPTIONS" ),  ScreenWidth - ( XRES ( CAMOPTIONS_BUTTON_X ) + 15 ), YRES(6), XRES ( CAMOPTIONS_BUTTON_X ), YRES(20), false, false );
-	m_CamButton->setParent( m_BottomBorder );
+	m_CamButton->setParent( this );
 	m_CamButton->setContentAlignment( vgui::Label::a_center );
 	m_CamButton->setBoundKey( (char)255 );	// special no bound to avoid leading spaces in name 
 	m_CamButton->addActionSignal( new CSpectatorHandler_Command( this, SPECTATOR_PANEL_CMD_CAMERA ) );
@@ -155,7 +156,7 @@ void SpectatorPanel::Initialize()
 	m_CamButton->setArmedColor ( 194, 202, 54, 0 );
 
 	m_PrevPlayerButton= new ColorButton("<", XRES( 15 + OPTIONS_BUTTON_X + 15 ), YRES(6), XRES(24), YRES(20), false, false );
-	m_PrevPlayerButton->setParent( m_BottomBorder );
+	m_PrevPlayerButton->setParent( this );
 	m_PrevPlayerButton->setContentAlignment( vgui::Label::a_center );
 	m_PrevPlayerButton->setBoundKey( (char)255 );	// special no bound to avoid leading spaces in name 
 	m_PrevPlayerButton->addActionSignal( new CSpectatorHandler_Command(this,SPECTATOR_PANEL_CMD_PREVPLAYER) );
@@ -165,7 +166,7 @@ void SpectatorPanel::Initialize()
 	m_PrevPlayerButton->setArmedColor ( 194, 202, 54, 0 );
 
 	m_NextPlayerButton= new ColorButton(">", (ScreenWidth - (XRES ( CAMOPTIONS_BUTTON_X ) + 15)) - XRES ( 24 + 15 ), YRES(6), XRES(24), YRES(20),false, false );
-	m_NextPlayerButton->setParent( m_BottomBorder );
+	m_NextPlayerButton->setParent( this );
 	m_NextPlayerButton->setContentAlignment( vgui::Label::a_center );
 	m_NextPlayerButton->setBoundKey( (char)255 );	// special no bound to avoid leading spaces in name 
 	m_NextPlayerButton->addActionSignal( new CSpectatorHandler_Command(this,SPECTATOR_PANEL_CMD_NEXTPLAYER) );
@@ -289,7 +290,7 @@ void SpectatorPanel::EnableInsetView(bool isEnabled)
 	if ( isEnabled )
 	{
 		// short black bar to see full inset
-		m_TopBorder->setBounds(	XRES(offset), 0, XRES(640 - offset ), YRES(PANEL_HEIGHT) );
+		//m_TopBorder->setBounds(	XRES(offset), 0, XRES(640 - offset ), YRES(PANEL_HEIGHT) );
 
 		if ( gEngfuncs.IsSpectateOnly() )
 		{
@@ -315,7 +316,7 @@ void SpectatorPanel::EnableInsetView(bool isEnabled)
 		else
 			m_TopBanner->setVisible( false );
 
-		m_TopBorder->setBounds( 0, 0, ScreenWidth, YRES(PANEL_HEIGHT) );
+		//m_TopBorder->setBounds( 0, 0, ScreenWidth, YRES(PANEL_HEIGHT) );
 						
 		m_InsetViewButton->setVisible(false);
 	}

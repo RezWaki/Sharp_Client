@@ -36,6 +36,7 @@ team_info_t			 g_TeamInfo[MAX_TEAMS+1];
 int					 g_IsSpectator[MAX_PLAYERS+1];
 
 extern cvar_t* pScorePanelColor;
+extern char* steam_ids[32];
 
 int HUD_IsGame( const char *game );
 int EV_TFC_IsAllyTeam( int iTeam1, int iTeam2 );
@@ -60,7 +61,7 @@ SBColumnInfo g_ColumnInfo[NUM_COLUMNS] =
 {
 	{NULL,			24,			Label::a_east},
 	{NULL,			140,		Label::a_east},		// name
-	{NULL,			56,			Label::a_east},		// class
+	{"Model",			56,			Label::a_east},		// class
 	{"#SCORE",		40,			Label::a_east},
 	{"#DEATHS",		46,			Label::a_east},
 	{"#LATENCY",	46,			Label::a_east},
@@ -799,34 +800,10 @@ void ScorePanel::FillGrid()
 					}
 					break;
 				case COLUMN_CLASS:
-					// No class for other team's members (unless allied or spectator)
-					if ( gViewPort && EV_TFC_IsAllyTeam( g_iTeamNumber, g_PlayerExtraInfo[ m_iSortedRows[row] ].teamnumber )  )
-						bShowClass = true;
-					// Don't show classes if this client hasnt picked a team yet
-					if ( g_iTeamNumber == 0 )
-						bShowClass = false;
-
-					if (bShowClass)
-					{
-						// Only print Civilian if this team are all civilians
-						bool bNoClass = false;
-						if ( g_PlayerExtraInfo[ m_iSortedRows[row] ].playerclass == 0 )
-						{
-							if ( gViewPort->GetValidClasses( g_PlayerExtraInfo[ m_iSortedRows[row] ].teamnumber ) != -1 )
-								bNoClass = true;
-						}
-
-						if (bNoClass)
-							sprintf(sz, "");
-						else
-							sprintf( sz, "%s", CHudTextMessage::BufferedLocaliseTextString( sLocalisedClasses[ g_PlayerExtraInfo[ m_iSortedRows[row] ].playerclass ] ) );
-					}
-					else
-					{
-						strcpy(sz, "");
-					}
+					sprintf( sz, "%s", gHUD.RemoveColors(pl_info->model) );
+					/*if( g_PlayerExtraInfo[ m_iSortedRows[row] ].teamnumber == g_PlayerExtraInfo[gEngfuncs.GetLocalPlayer()->index].teamnumber ) {
+						sprintf( sz, "%s", */
 					break;
-
 				case COLUMN_TRACKER:
 					//sprintf(sz, "[%s]", g_PlayerInfoList[m_iSortedRows[row]].model);
 					break;

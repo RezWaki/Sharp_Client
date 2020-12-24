@@ -4,6 +4,8 @@
 #include "cl_util.h"
 #include <string.h>
 #include <stdio.h>
+#include <ctime>
+#include "demo_api.h"
 #include "parsemsg.h"
 #include "rezglobal.h"
 
@@ -103,6 +105,22 @@ int AgHudCountdown::MsgFunc_Countdown(const char *pszName,  int iSize, void *pbu
       if (0 == m_btCountdown)
       {
         gEngfuncs.pfnPlaySoundByName("barney/ba_bring.wav",1);
+		if( CVAR_GET_FLOAT("cl_autorecord") && !gEngfuncs.pDemoAPI->IsRecording() ) {
+			char demoname[256];
+			char democmd[256];
+			char demomsg[256];
+			char mapname[256];
+			strncpy( mapname, gEngfuncs.pfnGetLevelName()+5, strlen(gEngfuncs.pfnGetLevelName())-9 );
+			time_t pTime = time(NULL);
+			tm* pDateTime = localtime( &pTime );
+			sprintf( demoname, "rec_%s_%i-%i-%i_%i-%i-%i", mapname, pDateTime->tm_mon+1,
+				pDateTime->tm_mday, pDateTime->tm_year-100, pDateTime->tm_hour, pDateTime->tm_min,
+				pDateTime->tm_sec );
+			sprintf( democmd, "record %s", demoname );
+			sprintf( demomsg, "Started recording to\n%s", demoname );
+			gEngfuncs.pfnClientCmd( democmd );
+			gEngfuncs.pfnCenterPrint( demomsg );
+		}
       }
       else if (1 == m_btCountdown)
         gEngfuncs.pfnPlaySoundByName("fvox/one.wav",1);

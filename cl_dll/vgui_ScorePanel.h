@@ -231,6 +231,7 @@ class ScoreTablePanel;
 class ScorePanel : public Panel, public vgui::CDefaultInputSignal
 {
 private:
+
 	// Default panel implementation doesn't forward mouse messages when there is no cursor and we need them.
 	class HitTestPanel : public Panel
 	{

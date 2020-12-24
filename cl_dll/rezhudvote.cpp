@@ -56,34 +56,62 @@ int AgHudVote::Draw(float fTime)
   sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i %i", &r, &g, &b, &a );
 
   char szText[128];
-  plusX = (ScreenWidth/2)/1;
-  plusY = (ScreenHeight/2)/2;
   if( CVAR_GET_FLOAT("cl_vote_defaultpos") ) {
-	  plusX = ScreenWidth/20;
-	  plusY = ScreenHeight/8;
+	  sprintf(szText,"Vote: %s %s",m_szVote,m_szValue);
+	  gHUD.DrawHudString(ScreenWidth/20, ScreenHeight/8 ,ScreenWidth,szText,r,g,b);
+	  sprintf(szText,"Called by: %s",m_szCalled);
+	  gHUD.DrawHudString(ScreenWidth/20, ScreenHeight/8 + gHUD.m_scrinfo.iCharHeight,ScreenWidth,szText,r,g,b);
+	  if (Called == m_iVoteStatus)
+	  {
+		sprintf(szText,"For: %d",m_iFor);
+		gHUD.DrawHudString(ScreenWidth/20, ScreenHeight/8 + gHUD.m_scrinfo.iCharHeight*2 ,ScreenWidth,szText,r,g,b);
+		sprintf(szText,"Against: %d ",m_iAgainst);
+		gHUD.DrawHudString(ScreenWidth/20, ScreenHeight/8 + gHUD.m_scrinfo.iCharHeight*3,ScreenWidth,szText,r,g,b);
+		sprintf(szText,"Undecided: %d",m_iUndecided);
+		gHUD.DrawHudString(ScreenWidth/20, ScreenHeight/8 + gHUD.m_scrinfo.iCharHeight*4,ScreenWidth,szText,r,g,b);
+	  }
+	  else if (Accepted == m_iVoteStatus)
+	  {
+		strcpy(szText,"Accepted!");
+		gHUD.DrawHudString(ScreenWidth/20, ScreenHeight/8 + gHUD.m_scrinfo.iCharHeight*2,ScreenWidth,szText,r,g,b);
+	  }
+	  else if (Denied == m_iVoteStatus)
+	  {
+		strcpy(szText,"Denied!");
+		gHUD.DrawHudString(ScreenWidth/20, ScreenHeight/8 + gHUD.m_scrinfo.iCharHeight*2,ScreenWidth,szText,r,g,b);
+	  }
   }
-  sprintf(szText,"Vote: %s %s",m_szVote,m_szValue);
-  gHUD.DrawHudString( plusX, plusY, ScreenWidth, szText,r, g, b );
-  sprintf( szText,"Called by: %s",gHUD.RemoveColors(m_szCalled) );
-  gHUD.DrawHudString( plusX, plusY+gHUD.m_scrinfo.iCharHeight, ScreenWidth, szText, r, g, b );
-  if (Called == m_iVoteStatus)
-  {
-    sprintf(szText,"For: %d",m_iFor);
-    gHUD.DrawHudString(plusX, plusY + gHUD.m_scrinfo.iCharHeight*2 ,ScreenWidth,szText,r,g,b);
-    sprintf(szText,"Against: %d ",m_iAgainst);
-    gHUD.DrawHudString(plusX, plusY + gHUD.m_scrinfo.iCharHeight*3,ScreenWidth,szText,r,g,b);
-    sprintf(szText,"Undecided: %d",m_iUndecided);
-    gHUD.DrawHudString(plusX, plusY + gHUD.m_scrinfo.iCharHeight*4,ScreenWidth,szText,r,g,b);
-  }
-  else if (Accepted == m_iVoteStatus)
-  {
-    strcpy(szText,"Accepted!");
-    gHUD.DrawHudString(plusX, plusY + gHUD.m_scrinfo.iCharHeight*2,ScreenWidth,szText,r,g,b);
-  }
-  else if (Denied == m_iVoteStatus)
-  {
-    strcpy(szText,"Denied!");
-    gHUD.DrawHudString(plusX, plusY + gHUD.m_scrinfo.iCharHeight*2,ScreenWidth,szText,r,g,b);
+  else{
+	  sprintf(szText,"Vote: %s %s",m_szVote,m_szValue);
+	  //gHUD.DrawHudString( plusX, plusY, ScreenWidth, szText,r, g, b );
+	  AgDrawHudStringCentered(ScreenWidth / 2, (gHUD.m_scrinfo.iCharHeight/3)+32,ScreenWidth,szText,r,g,b);
+	  sprintf( szText,"Called by: %s",gHUD.RemoveColors(m_szCalled) );
+	  //gHUD.DrawHudString( plusX-strlen(szText), plusY+gHUD.m_scrinfo.iCharHeight, ScreenWidth, szText, r, g, b );
+	  AgDrawHudStringCentered(ScreenWidth / 2, (gHUD.m_scrinfo.iCharHeight)+32, ScreenWidth,szText,r,g,b);
+	  if (Called == m_iVoteStatus)
+	  {
+		sprintf(szText,"For: %d",m_iFor);
+		//gHUD.DrawHudString(plusX-strlen(szText), plusY + gHUD.m_scrinfo.iCharHeight*2 ,ScreenWidth,szText,r,g,b);
+		AgDrawHudStringCentered(ScreenWidth / 2, (gHUD.m_scrinfo.iCharHeight*2)+32,ScreenWidth,szText,r,g,b);
+		sprintf(szText,"Against: %d ",m_iAgainst);
+		//gHUD.DrawHudString(plusX-strlen(szText), plusY + gHUD.m_scrinfo.iCharHeight*3,ScreenWidth,szText,r,g,b);
+		AgDrawHudStringCentered(ScreenWidth / 2, (gHUD.m_scrinfo.iCharHeight*3)+32,ScreenWidth,szText,r,g,b);
+		sprintf(szText,"Undecided: %d",m_iUndecided);
+		//gHUD.DrawHudString(plusX-strlen(szText), plusY + gHUD.m_scrinfo.iCharHeight*4,ScreenWidth,szText,r,g,b);
+		AgDrawHudStringCentered(ScreenWidth / 2, (gHUD.m_scrinfo.iCharHeight*4)+32,ScreenWidth,szText,r,g,b);
+	  }
+	  else if (Accepted == m_iVoteStatus)
+	  {
+		strcpy(szText,"Accepted!");
+		//gHUD.DrawHudString(plusX-strlen(szText), plusY + gHUD.m_scrinfo.iCharHeight*2,ScreenWidth,szText,r,g,b);
+		AgDrawHudStringCentered(ScreenWidth / 2, (gHUD.m_scrinfo.iCharHeight*2)+32,ScreenWidth,szText,r,g,b);
+	  }
+	  else if (Denied == m_iVoteStatus)
+	  {
+		strcpy(szText,"Denied!");
+		//gHUD.DrawHudString(plusX-strlen(szText), plusY + gHUD.m_scrinfo.iCharHeight*2,ScreenWidth,szText,r,g,b);
+		AgDrawHudStringCentered(ScreenWidth / 2, (gHUD.m_scrinfo.iCharHeight*2)+32, ScreenWidth,szText,r,g,b);
+	  }
   }
 
   return 0;

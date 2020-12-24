@@ -25,6 +25,12 @@ cvar_s* m_pCvarFakeDrawEntities;
 BOOL bCrosshairMustBeRed = FALSE;
 BOOL bAmISpec = FALSE;
 INT pLightColors[3];
+FLOAT wpn_offsets[3];
+INT pWeapBoxColors[3];
+FLOAT m_flFlashTime = 0;
+BOOL iFlashStatus = TRUE;
+Vector def_wpnloc;
+BOOL bFirst = TRUE;
 
 /////////////////////
 // Implementation of CStudioModelRenderer.h
@@ -1047,8 +1053,6 @@ void CStudioModelRenderer::StudioMergeBones ( model_t *m_pSubModel )
 	}
 }
 
-INT pWeapBoxColors[3], iPhase = 0;
-
 /*
 ====================
 StudioDrawModel
@@ -1065,6 +1069,11 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 	IEngineStudio.GetTimes( &m_nFrameCount, &m_clTime, &m_clOldTime );
 	IEngineStudio.GetViewInfo( m_vRenderOrigin, m_vUp, m_vRight, m_vNormal );
 	IEngineStudio.GetAliasScale( &m_fSoftwareXScale, &m_fSoftwareYScale );
+
+	if( CVAR_GET_STRING("cl_weaponpos") != "0 0 0" ) {
+		sscanf( CVAR_GET_STRING("cl_weaponpos"), "%f %f %f", &wpn_offsets[0], &wpn_offsets[1], &wpn_offsets[2] );
+		gEngfuncs.GetViewModel()->origin += wpn_offsets;
+	}
 
 	if (m_pCurrentEntity->curstate.renderfx == kRenderFxDeadPlayer)
 	{
@@ -1488,15 +1497,14 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 		}
 
 		if( CVAR_GET_FLOAT("cl_flashplayer") ) {
-			iPhase++;
-			if( iPhase <= 500 ) {
-				pWeapBoxColors[0] = pWeapBoxColors[1] = pWeapBoxColors[2] = 255;
+			if( gEngfuncs.GetClientTime() > m_flFlashTime ) {
+				if( iFlashStatus )
+					pWeapBoxColors[0] = pWeapBoxColors[1] = pWeapBoxColors[2] = 255;
+				else
+					pWeapBoxColors[0] = 255; pWeapBoxColors[1] = pWeapBoxColors[2] = 0;
+				iFlashStatus = !iFlashStatus;
+				m_flFlashTime - gEngfuncs.GetClientTime()+1;
 			}
-			else if( iPhase > 500 && iPhase <= 1000 ) {
-				pWeapBoxColors[0] = 255;
-				pWeapBoxColors[1] = pWeapBoxColors[2] = 0;
-			}
-			else if( iPhase > 1000 ) iPhase = 0;
 			lighting.color = Vector( pWeapBoxColors[0], pWeapBoxColors[1], pWeapBoxColors[2] );
 		}
 
@@ -1751,7 +1759,6 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware( void )
 	else{
 		gEngfuncs.GetViewModel()->curstate.renderfx = kRenderFxNone;
 	}
-
 	IEngineStudio.RestoreRenderer();
 }
 

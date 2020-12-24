@@ -34,4 +34,21 @@ void CRenderFuncs::WireframeForModel( model_s* mdl ) {
 #endif
 }
 
+char* CRenderFuncs::GetRealModelPath( char* input ) {
+	if( CVAR_GET_STRING("cl_models_subfolder") != "0" ) {
+		pModelName = input;
+		for( pCounter = 0; pCounter < pModelName.length(); pCounter++ ) {
+			if( pModelName.substr( pCounter, 1 ) == "/" ) {
+				break;
+			}
+		}
+		strcpy( pModelPath, pModelName.substr( pCounter+1, pModelName.length()-(pCounter+1) ).c_str() );
+		sprintf( pNewModelPath, "models/%s/%s", CVAR_GET_STRING("cl_models_subfolder"), pModelPath );
+		gEngfuncs.pfnCenterPrint( pNewModelPath );
+		gEngfuncs.pfnConsolePrint( pNewModelPath );
+		return pNewModelPath;
+	}
+	else return input;
+}
+
 CRenderFuncs gpRenderFuncs;

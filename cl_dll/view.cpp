@@ -232,7 +232,7 @@ float V_CalcRoll (vec3_t angles, vec3_t velocity, float rollangle, float rollspe
     float   side;
     float   value;
 	vec3_t  forward, right, up;
-    
+
 	AngleVectors ( angles, forward, right, up );
     
 	side = DotProduct (velocity, right);
@@ -297,7 +297,8 @@ void V_DriftPitch ( struct ref_params_s *pparams )
 {
 	float		delta, move;
 
-	if ( gEngfuncs.IsNoClipping() || !pparams->onground || pparams->demoplayback || pparams->spectator )
+	if ( gEngfuncs.IsNoClipping() || !pparams->onground || pparams->demoplayback || pparams->spectator
+		|| CVAR_GET_FLOAT("cl_hltvmode") )
 	{
 		pd.driftmove = 0;
 		pd.pitchvel = 0;
@@ -697,29 +698,29 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	V_DropPunchAngle ( pparams->frametime, (float *)&ev_punchangle );
 
 	// smooth out stair step ups
-#if 1
-	if ( !pparams->smoothing && pparams->onground && pparams->simorg[2] - oldz > 0)
-	{
-		float steptime;
+	if( !CVAR_GET_FLOAT("cl_oldladdersteps") ) {
+		if ( !pparams->smoothing && pparams->onground && pparams->simorg[2] - oldz > 0)
+		{
+			float steptime;
 		
-		steptime = pparams->time - lasttime;
-		if (steptime < 0)
-	//FIXME		I_Error ("steptime < 0");
-			steptime = 0;
+			steptime = pparams->time - lasttime;
+			if (steptime < 0)
+		//FIXME		I_Error ("steptime < 0");
+				steptime = 0;
 
-		oldz += steptime * 150;
-		if (oldz > pparams->simorg[2])
+			oldz += steptime * 150;
+			if (oldz > pparams->simorg[2])
+				oldz = pparams->simorg[2];
+			if (pparams->simorg[2] - oldz > 18)
+				oldz = pparams->simorg[2]- 18;
+			pparams->vieworg[2] += oldz - pparams->simorg[2];
+			view->origin[2] += oldz - pparams->simorg[2];
+		}
+		else
+		{
 			oldz = pparams->simorg[2];
-		if (pparams->simorg[2] - oldz > 18)
-			oldz = pparams->simorg[2]- 18;
-		pparams->vieworg[2] += oldz - pparams->simorg[2];
-		view->origin[2] += oldz - pparams->simorg[2];
+		}
 	}
-	else
-	{
-		oldz = pparams->simorg[2];
-	}
-#endif
 
 	{
 		static float lastorg[3];
@@ -1273,7 +1274,7 @@ void V_GetChasePos(int target, float * cl_angles, float * origin, float * angles
 
 		VectorCopy ( ent->origin, origin);
 		
-		origin[2]+= 28; // DEFAULT_VIEWHEIGHT - some offset
+		origin[2] += CVAR_GET_FLOAT("cl_specoffset"); // DEFAULT_VIEWHEIGHT - some offset
 
 		V_GetChaseOrigin( angles, origin, cl_chasedist->value, origin );
 	}
@@ -1318,7 +1319,7 @@ void V_GetInEyePos(int target, float * origin, float * angles )
 	else
 		// exacty eye position can't be caluculated since it depends on
 		// client values like cl_bobcycle, this offset matches the default values
-		origin[2]+= 28; // DEFAULT_VIEWHEIGHT
+		origin[2] += CVAR_GET_FLOAT("cl_specoffset"); // DEFAULT_VIEWHEIGHT
 }
 
 void V_GetMapFreePosition( float * cl_angles, float * origin, float * angles )
@@ -1517,7 +1518,7 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 		else
 		{
 			// only get viewangles from entity
-			VectorCopy ( ent->angles, pparams->cl_viewangles );
+			VectorCopy( ent->angles, pparams->cl_viewangles );
 			pparams->cl_viewangles[PITCH]*=-3.0f;	// see CL_ProcessEntityUpdate()
 		}
 	}
@@ -1596,6 +1597,7 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 	}
 
 	// write back new values into pparams
+	//v_origin.z += 32; //add this
 	VectorCopy ( v_cl_angles, pparams->cl_viewangles );
 	VectorCopy ( v_angles, pparams->viewangles )
 	VectorCopy ( v_origin, pparams->vieworg );

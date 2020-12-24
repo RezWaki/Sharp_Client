@@ -152,6 +152,28 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
 
+	CVAR_CREATE( "cl_scorecolor", "0 15 20 150", NULL );
+	CVAR_CREATE( "cl_scorehighlight", "1", NULL );
+	CVAR_CREATE( "cl_hudcolorforname", "0", NULL );
+	CVAR_CREATE( "cl_hudcolor", "255 0 0 255", NULL );
+	CVAR_CREATE( "cl_vote_defaultpos", "0", NULL );
+	CVAR_CREATE( "cl_gaussbeam_color", "150 0 255", NULL );
+	CVAR_CREATE( "r_fakedrawentities", "1", NULL );
+	CVAR_CREATE( "cl_hudweapon", "0", NULL );
+	CVAR_CREATE( "cl_smart_crosshair", "1", NULL );
+	CVAR_CREATE( "r_noplayerlights", "0", NULL );
+	CVAR_CREATE( "r_noitemlights", "0", NULL );
+	CVAR_CREATE( "r_forcerendercolors", "0", NULL );
+	CVAR_CREATE( "cl_newhud", "1", NULL );
+	CVAR_CREATE( "cl_usenewteamcolors", "1", NULL );
+	CVAR_CREATE( "cl_hltvmode", "0", NULL );
+	CVAR_CREATE( "r_extrachrome", "1", NULL );
+	CVAR_CREATE( "cl_flashplayer", "0", NULL );
+	CVAR_CREATE( "cl_specwh", "0", NULL );
+	CVAR_CREATE( "cl_itemtimer", "0", NULL );
+	CVAR_CREATE( "cl_rainbowhud", "0", NULL );
+	CVAR_CREATE( "cl_models_subfolder", "1", NULL );
+
 	CVAR_CREATE( "cl_drawteams", "1", NULL );
 	CVAR_CREATE( "cl_drawteamscores", "1", NULL );
 	CVAR_CREATE( "cl_crosshair", "1", NULL );
@@ -164,6 +186,22 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	CVAR_CREATE( "cl_scorepanel_offsets", "0 0", NULL );
 	CVAR_CREATE( "cl_spechud_offset", "128", NULL );
 	CVAR_CREATE( "cl_damagepunch", "0", NULL );
+	CVAR_CREATE( "cl_disabledynamiclights", "1", NULL );
+	CVAR_CREATE( "cl_forcebeamcolors", "255 0 0", NULL );
+	CVAR_CREATE( "cl_blockclientcmd", "1", NULL );
+	CVAR_CREATE( "cl_smartcrosscolor", "255 0 0", NULL );
+	CVAR_CREATE( "cl_newscoreboard", "0", NULL );
+	CVAR_CREATE( "cl_newscore_offset_x", "0", NULL );
+	CVAR_CREATE( "cl_newscore_offset_y", "0", NULL );
+	CVAR_CREATE( "cl_cross_sprname", "mycrosshair", NULL );
+	CVAR_CREATE( "cl_cross_sprsize", "32", NULL );
+	CVAR_CREATE( "cl_weaponpos", "0 0 0", NULL );
+	CVAR_CREATE( "cl_oldladdersteps", "1", NULL );
+	CVAR_CREATE( "cl_specoffset", "28", NULL );
+	CVAR_CREATE( "cl_drawlogo", "0", NULL );
+	CVAR_CREATE( "cl_logopos", "0 0", NULL );
+	CVAR_CREATE( "cl_autorecord", "1", NULL );
+	//CVAR_CREATE( "cl_duckview_height", "12", NULL );
 	//CVAR_CREATE( "cl_scorepanel_bounds", "512 512", NULL );
 #ifdef _DEBUG
 	CVAR_CREATE( "r_glwireframecolors", "255 0 0 255", NULL );

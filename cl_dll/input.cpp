@@ -45,6 +45,8 @@ extern int g_iAlive;
 extern int g_weaponselect;
 extern cl_enginefunc_t gEngfuncs;
 
+int bShouldShowScoreboard = FALSE;
+
 // Defined in pm_math.c
 extern "C" float anglemod( float a );
 
@@ -523,18 +525,28 @@ void IN_Impulse (void)
 void IN_ScoreDown(void)
 {
 	KeyDown(&in_score);
-	if ( gViewPort )
-	{
-		gViewPort->ShowScoreBoard();
+	if( CVAR_GET_FLOAT("cl_newscoreboard" ) ) {
+		bShouldShowScoreboard = TRUE;
+	}
+	else{
+		if ( gViewPort )
+		{
+			gViewPort->ShowScoreBoard();
+		}
 	}
 }
 
 void IN_ScoreUp(void)
 {
 	KeyUp(&in_score);
-	if ( gViewPort )
-	{
-		gViewPort->HideScoreBoard();
+	if( CVAR_GET_FLOAT("cl_newscoreboard" ) ) {
+		bShouldShowScoreboard = FALSE;
+	}
+	else{
+		if ( gViewPort )
+		{
+			gViewPort->HideScoreBoard();
+		}
 	}
 }
 

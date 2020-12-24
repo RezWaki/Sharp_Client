@@ -40,7 +40,6 @@ extern "C"
 	void DLLEXPORT HUD_TempEntUpdate( double frametime, double client_time, double cl_gravity, struct tempent_s **ppTempEntFree, struct tempent_s **ppTempEntActive, int ( *Callback_AddVisibleEntity )( struct cl_entity_s *pEntity ), void ( *Callback_TempEntPlaySound )( struct tempent_s *pTemp, float damp ) );
 	struct cl_entity_s DLLEXPORT *HUD_GetUserEntity( int index );
 }
-
 BOOL bExecuted = FALSE;
 
 /*
@@ -62,7 +61,16 @@ int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *mode
 	case ET_NORMAL:
 	case ET_PLAYER:
 	case ET_BEAM:
+			if( CVAR_GET_FLOAT("cl_forcebeamcolors") != 0 ) {
+				sscanf( CVAR_GET_STRING("cl_forcebeamcolors"), "%i %i %i", &ent->curstate.rendercolor.r, &ent->curstate.rendercolor.g, &ent->curstate.rendercolor.b );
+			}
+		break;
 	case ET_TEMPENTITY:
+			if( CVAR_GET_FLOAT("cl_disabledynamiclights") ) {
+				ent->curstate.effects = NULL;
+				ent->baseline.effects = NULL;
+			}
+		break;
 	case ET_FRAGMENTED:
 	default:
 		break;
@@ -96,7 +104,9 @@ structure, we need to copy them into the state structure at this point.
 */
 void DLLEXPORT HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client )
 {
-	state->effects &= ~(EF_BRIGHTLIGHT | EF_DIMLIGHT | EF_LIGHT);
+	if( !CVAR_GET_FLOAT("cl_disabledynamiclights") ) {
+		state->effects &= ~(EF_BRIGHTLIGHT | EF_DIMLIGHT | EF_LIGHT);
+	}
 
 	VectorCopy( client->origin, state->origin );
 
@@ -950,7 +960,7 @@ void DLLEXPORT HUD_TempEntUpdate (
 		}
 		pTemp = pnext;
 	}
-
+	
 finish:
 	// Restore state info
 	gEngfuncs.pEventAPI->EV_PopPMStates();
