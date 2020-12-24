@@ -1,10 +1,10 @@
 ==- SHARP CLIENT -==
-    update v9.0
+    update v10.0
 
 This is client library for Half-Life / Adrenaline Gamer mod
 Feel free to use it under AG because it contains all basic AG features
 
-To install it just extract all from archive into "valve\cl_dlls" / "ag\cl_dlls" folder,
+To install it just extract all from archive into "valve" / "ag" folder,
 agree the replace if needed
 
 You can set up this client via console commands, simply put them into your
@@ -16,7 +16,7 @@ cfg file either type in console to test, full commands list:
   | cl_scorecolor 	| R G B	    | You can control the scoreboard color with it
   | cl_scorehighlight	| 0/1/2	    | Scoreboard nickname highlight modes, 0 - disable
   | cl_drawteamscores	| 1/0	    | Toggle score draw on teamscores panel
-  | cl_crosshair	| 0/1/2/3/4 | Switch between custom crosshairs, 0 - disable
+  | cl_crosshair	| 0/1/2/3/4/5|Switch between custom crosshairs, 0 - disable
   | cl_crosscolor	| R G B	    | Control the custom crosshair color
   | cl_crossdotsize	| integer   | Control the "dot" custom crosshair size
   | cl_autobhop		| 1/0	    | Autobunnyhop
@@ -45,6 +45,15 @@ cfg file either type in console to test, full commands list:
   | cl_specplayers	| int int   | Type here indexes (NOT userids) for players
   | cl_spechud_offset	| integer   | Enter here Y-axis offset for teamplay spechud
   | cl_damagepunch	| 0/1	    | Toggle punch-effect when getting damage
+  | cl_autorecord	| 0/1	    | Toggle agstart demo autorecord
+  | cl_specoffset	| integer   | Set spectator mode camera offset (height)
+  | cl_oldladdersteps	| 0/1	    | Remove stairs climbing smoothing effect
+  | cl_weaponpos	| x y z     | Weaponmodel offset (x, y, z)
+  | cl_cross_sprname	| string    | Sprite filename for crosshair mode 5
+  | cl_cross_sprsize	| integer   | Width of sprite frame (width & height must be equal)
+  | cl_newscoreboard	| 0/1	    | Toggle new scoreboard
+  | cl_newscore_offset_x| integer   | New scoreboard's x offset
+  | cl_newscore_offset_y| integer   | New scoreboard's y offset
 
 Other fixes/addins/removes:
 	[REMOVED] Scoreboard mouse click fixed
@@ -64,3 +73,10 @@ Other fixes/addins/removes:
 	[ADDED] Spectator HUD with 2 modes, for more details read spechud.txt
 	[ADDED] Screen punch-effect when getting damage
 	[FIXED] cl_newhud 2 ammo hud's "0" problem fixed
+	[ADDED] Weapon position control (offsets)
+	[ADDED] New crosshair mode (5 - sprite crosshair)
+	[ADDED] Spectator 1st person mode camera offset (height)
+	[ADDED] Removable stairs climbing smoothing effect
+	[FIXED] Spectator HUD minor bugs
+	[ADDED] New scoreboard (very raw now)
+	Other minor fixes, e.g. flashplayer time fix
