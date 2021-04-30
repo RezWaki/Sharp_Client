@@ -1,5 +1,5 @@
 ==- SHARP CLIENT -==
-    update v10.0
+    update v11.0
 
 This is client library for Half-Life / Adrenaline Gamer mod
 Feel free to use it under AG because it contains all basic AG features
@@ -21,7 +21,7 @@ cfg file either type in console to test, full commands list:
   | cl_crossdotsize	| integer   | Control the "dot" custom crosshair size
   | cl_autobhop		| 1/0	    | Autobunnyhop
   | cl_slide		| 0/1/2	    | DuckSpam modes (slide/doubleduck emulation)
-  | cl_slidefactor	| Float	    | DuckSpam frequency for slidemode (0.9 recommended)
+  | cl_slide_interval	| Float	    | DuckSpam frequency for slidemode (0.5 recommended)
   | cl_hudcolorforname  | 1/0	    | Use last-used color for nickname in scoreboard
   | cl_hudcolor		| R G B	    | Control the whole HUD color
   | cl_vote_defaultpos  | 1/0	    | Use default position for AG vote HUDs
@@ -54,6 +54,23 @@ cfg file either type in console to test, full commands list:
   | cl_newscoreboard	| 0/1	    | Toggle new scoreboard
   | cl_newscore_offset_x| integer   | New scoreboard's x offset
   | cl_newscore_offset_y| integer   | New scoreboard's y offset
+  | cl_traceline	| integer   | Draw bullet traceline with specified width, 0 - disable
+  | cl_maxtracelines	| integer   | Maximum tracelines to be drawn
+  | cl_traceline_color  | R G B     | Specify tracelines color
+  | cl_cross_trace	| 0/1	    | Draw traceline for your crosshair
+  | cl_usenewhudstring	| 0/1	    | Use new fonts for DrawHudString()
+  | cl_drawmyname	| 0/1	    | Whether or not draw your nickname with new hud style
+  | cl_hidehudsininterm | 0/1	    | Hide your HUD if it's intermission?
+  | cl_showinterstats	| 0/1	    | Show your shot stats during intermission
+  | cl_blackdeathscreen | 0/1	    | Black screen while you're dead
+  | cl_deathcam_height  | integer   | Camera offset above the ground when you're dead
+  | cl_deathcam_angle	| integer   | Camera angle offset when you're dead
+  | cl_clocks		| 0/1	    | Show clocks
+  | cl_clocks_pos	| flt flt   | Specify the clocks position in floats (1 = max, 0 = min)
+  | cl_clocks_fmt	| 0/1	    | Specify the clocks mode (12 hours/24 hours)
+  | cl_clocks_del	| string    | The clocks delimiter
+  | hud_timer		| 0/1	    | The AG timer that shows during the match
+
 
 Other fixes/addins/removes:
 	[REMOVED] Scoreboard mouse click fixed
@@ -66,7 +83,7 @@ Other fixes/addins/removes:
 	[FIXED] cl_hudcolor health drawing bug with cl_newhud 0
 	[FIXED] Array-size dependent memory corruption bug
 	[ADDED] 2 new chrome render modes
-	[ADDED] Spectator wallhack with chams, its gonna work ONLY if you is spectator
+	[ADDED] Spectator wallhack with chams, its gonna work ONLY if you are spectator
 	[ADDED] Player model flashing
 	[ADDED] Weapons & items next-spawn timer
 	[ADDED] Rainbow color hud changer
@@ -80,3 +97,11 @@ Other fixes/addins/removes:
 	[FIXED] Spectator HUD minor bugs
 	[ADDED] New scoreboard (very raw now)
 	Other minor fixes, e.g. flashplayer time fix
+	[ADDED] AG's hud_timer
+	[FIXED] Buggy player counting in the scoreboard,
+		what was causing some of the crashes
+	[FIXED] Game-time management bug after intermission
+	[FIXED] Server-title bug in the scoreboard
+	[ADDED] Every cvar is now being saved after you exit the game
+	[ADDED] Clocks
+	[ADDED] Shot stats in intermission
