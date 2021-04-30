@@ -396,6 +396,17 @@ void V_AddIdle ( struct ref_params_s *pparams )
 	pparams->viewangles[YAW] += v_idlescale * sin(pparams->time*v_iyaw_cycle.value) * v_iyaw_level.value;
 }
 
+/*
+=============
+V_PunchAxis
+
+Client side punch effect
+=============
+*/
+void V_PunchAxis( int axis, float punch )
+{
+	ev_punchangle[ axis ] = punch;
+}
 
 /*
 ==============
@@ -421,7 +432,10 @@ void V_CalcViewRoll ( struct ref_params_s *pparams )
 	{
 		// only roll the view if the player is dead and the viewheight[2] is nonzero 
 		// this is so deadcam in multiplayer will work.
-		pparams->viewangles[ROLL] = 80;	// dead view angle
+		//pparams->viewangles[ROLL] = 80;	// dead view angle
+		if( CVAR_GET_FLOAT("cl_blackdeathscreen") ) pparams->onlyClientDraw = 1;
+		pparams->viewangles[2] += CVAR_GET_FLOAT("cl_deathcam_angle");
+		pparams->vieworg[2] += CVAR_GET_FLOAT("cl_deathcam_height");
 		return;
 	}
 }
@@ -1656,18 +1670,6 @@ void V_DropPunchAngle ( float frametime, float *ev_punchangle )
 	len -= (10.0 + len * 0.5) * frametime;
 	len = max( len, 0.0 );
 	VectorScale ( ev_punchangle, len, ev_punchangle );
-}
-
-/*
-=============
-V_PunchAxis
-
-Client side punch effect
-=============
-*/
-void V_PunchAxis( int axis, float punch )
-{
-	ev_punchangle[ axis ] = punch;
 }
 
 /*

@@ -270,14 +270,14 @@
     <ClCompile Include="rezhudvote.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="renderfuncs.cpp">
+    <ClCompile Include="reztimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sharpfuncs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="parsemsg.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="ammo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -407,7 +407,10 @@
     <ClInclude Include="rezglobal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="renderfuncs.h">
+    <ClInclude Include="parsemsg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sharpfuncs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

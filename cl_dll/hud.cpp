@@ -350,6 +350,7 @@ void CHud :: Init( void )
 	m_StatusIcons.Init();
 	m_Vote.Init();
 	m_Countdown.Init();
+	m_Timer.Init();
 	GetClientVoiceMgr()->Init(&g_VoiceStatusHelper, (vgui::Panel**)&gViewPort);
 
 	m_Menu.Init();
@@ -501,6 +502,7 @@ void CHud :: VidInit( void )
 	m_StatusIcons.VidInit();
 	m_Vote.VidInit();
 	m_Countdown.VidInit();
+	m_Timer.VidInit();
 	GetClientVoiceMgr()->VidInit();
 }
 

@@ -38,6 +38,11 @@
 extern engine_studio_api_t IEngineStudio;
 
 static int tracerCount[ 32 ];
+Vector pVecDrawWeaponsTrace[128];
+Vector pVecShootLoc[128];
+INT gMyShotStats[12];
+
+int current_trace = 0; //start off 0
 
 extern "C" char PM_FindTextureType( char *name );
 
@@ -362,7 +367,11 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 	pmtrace_t tr;
 	int iShot;
 	int tracer;
-	
+
+	if( CVAR_GET_FLOAT("cl_showintermissionstats") ) {
+		gMyShotStats[iBulletType] += cShots;
+	}
+
 	for ( iShot = 1; iShot <= cShots; iShot++ )	
 	{
 		vec3_t vecDir, vecEnd;
@@ -405,6 +414,11 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 		gEngfuncs.pEventAPI->EV_PlayerTrace( vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr );
 
 		tracer = EV_HLDM_CheckTracer( idx, vecSrc, tr.endpos, forward, right, iBulletType, iTracerFreq, tracerCount );
+
+		if( current_trace > CVAR_GET_FLOAT("cl_maxtracelines") ) current_trace = 0;
+		pVecDrawWeaponsTrace[current_trace] = tr.endpos;
+		pVecShootLoc[current_trace] = vecSrc;
+		current_trace++;
 
 		// do damage, paint decals
 		if ( tr.fraction != 1.0 )
@@ -967,6 +981,12 @@ void EV_FireGauss( event_args_t *args )
 
 		if ( pEntity->solid == SOLID_BSP )
 		{
+
+			if( current_trace > CVAR_GET_FLOAT("cl_maxtracelines") ) current_trace = 0;
+			pVecDrawWeaponsTrace[current_trace] = tr.endpos;
+			pVecShootLoc[current_trace] = vecSrc;
+			current_trace++;
+
 			float n;
 
 			pentIgnore = NULL;
@@ -1045,7 +1065,7 @@ void EV_FireGauss( event_args_t *args )
 						gEngfuncs.pEventAPI->EV_PlayerTrace( beam_tr.endpos, tr.endpos, PM_STUDIO_BOX, -1, &beam_tr );
 
 						VectorSubtract( beam_tr.endpos, tr.endpos, delta );
-						
+
 						n = Length( delta );
 
 						if (n < flDamage)

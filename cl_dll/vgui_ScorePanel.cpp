@@ -263,11 +263,8 @@ int iScoreOffsets[2], iScoreBounds[2];
 void ScorePanel::Update()
 {
 	// Set the title
-	if (gViewPort->m_szServerName)
-	{
-		char sz[MAX_SERVERNAME_LENGTH + 16];
-		sprintf(sz, "%s", gViewPort->m_szServerName );
-		m_TitleLabel.setText(sz);
+	if( gViewPort->m_szServerName ) {
+		m_TitleLabel.setText( gViewPort->m_szServerName );
 	}
 
 	m_iRows = 0;

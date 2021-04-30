@@ -29,7 +29,7 @@
 #include "cl_dll.h"
 #include "ammo.h"
 #include <string>
-//#include <GL\glew.h>
+#include <Windows.h>
 
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS  2
@@ -71,7 +71,8 @@ class CHudBase
 public:
 	POSITION  m_pos;
 	int   m_type;
-	int	  m_iFlags; // active, moving, 
+	int	  m_iFlags; // active, moving
+	BOOL	  bMustBeDrawn; // WE MUST DRAW THIS HUD IN ANY WAY, e.g. hltv
 	virtual		~CHudBase() {}
 	virtual int Init( void ) {return 0;}
 	virtual int VidInit( void ) {return 0;}
@@ -79,6 +80,7 @@ public:
 	virtual void Think(void) {return;}
 	virtual void Reset(void) {return;}
 	virtual void InitHUDData( void ) {}		// called every time a server is connected to
+	CHudBase( void ) { bMustBeDrawn = FALSE; };
 
 };
 
@@ -603,6 +605,32 @@ private:
 
 //-- Martin Webrant
 
+
+#if !defined(_AG_TIMER_HUD_)
+#define _AG_TIMER_HUD_
+
+class AgHudTimer: public CHudBase
+{
+public:
+	int Init( void );
+	int VidInit( void );
+	int Draw(float flTime);
+  void Reset(void);
+	int MsgFunc_Timer(const char *pszName, int iSize, void *pbuf);
+
+  char m_szTime[64];
+private:
+	long    m_lTimelimit;
+  long    m_lEffectiveTime;
+  float   m_flTurnoff;
+
+  void    LiveUpdate();
+};
+
+#endif //_AG_TIMER_HUD_
+
+//-- Martin Webrant
+
 class CHud
 {
 private:
@@ -679,6 +707,7 @@ public:
 	CHudStatusIcons m_StatusIcons;
 	AgHudVote         m_Vote;
 	AgHudCountdown    m_Countdown;
+	AgHudTimer        m_Timer;
 
 	void Init( void );
 	void VidInit( void );

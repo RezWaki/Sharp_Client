@@ -16,8 +16,8 @@
 // hud_redraw.cpp
 //
 #include <math.h>
-#include "hud.h"
-#include "cl_util.h"
+#include "sharpfuncs.h"
+extern CFonts gpFonts;
 
 #include "vgui_TeamFortressViewport.h"
 
@@ -32,6 +32,8 @@ int grgLogoFrame[MAX_LOGO_FRAMES] =
 
 
 extern int g_iVisibleMouse;
+extern FLOAT iLastDuckTime, m_flRealTimer;
+extern INT gMyShotStats[12];
 
 float HUD_GetFOV( void );
 
@@ -91,6 +93,8 @@ int CHud :: Redraw( float flTime, int intermission )
 	m_flTimeDelta = (double)m_flTime - m_fOldTime;
 	static int m_flShotTime = 0;
 	
+	//ConsolePrint( "CHud::Redraw()" ); //redraw won't work in HLTV
+
 	// Clock was reset, reset delta
 	if ( m_flTimeDelta < 0 )
 		m_flTimeDelta = 0;
@@ -100,19 +104,25 @@ int CHud :: Redraw( float flTime, int intermission )
 	{
 		if ( m_iIntermission && !intermission )
 		{
+			//reset all timers on the intermission to prevent some bugs
+			iLastDuckTime = 0;
+			m_flRealTimer = 0;
 			// Have to do this here so the scoreboard goes away
 			m_iIntermission = intermission;
 			gViewPort->HideCommandMenu();
 			gViewPort->HideScoreBoard();
 			gViewPort->UpdateSpectatorPanel();
 		}
-		else if ( !m_iIntermission && intermission )
-		{
+		else if ( !m_iIntermission && intermission ) {
 			m_iIntermission = intermission;
-			gViewPort->HideCommandMenu();
-			gViewPort->HideVGUIMenu();
-			gViewPort->ShowScoreBoard();
-			gViewPort->UpdateSpectatorPanel();
+			if( CVAR_GET_FLOAT("cl_hidehudsinintermission") ) {
+				gViewPort->HideCommandMenu();
+				gViewPort->HideVGUIMenu();
+			}
+			if( CVAR_GET_FLOAT("cl_showscoreboardinintermission") ) {
+				gViewPort->ShowScoreBoard();
+				gViewPort->UpdateSpectatorPanel();
+			}
 
 			// Take a screenshot if the client's got the cvar set
 			if ( CVAR_GET_FLOAT( "hud_takesshots" ) != 0 )
@@ -127,9 +137,6 @@ int CHud :: Redraw( float flTime, int intermission )
 	}
 
 	m_iIntermission = intermission;
-
-	// if no redrawing is necessary
-	// return 0;
 	
 	if ( m_pCvarDraw->value )
 	{
@@ -137,15 +144,22 @@ int CHud :: Redraw( float flTime, int intermission )
 
 		while (pList)
 		{
-			if ( !intermission )
-			{
-				if ( (pList->p->m_iFlags & HUD_ACTIVE) && !(m_iHideHUDDisplay & HIDEHUD_ALL) )
+			if( !intermission ) {
+				if ( pList->p->bMustBeDrawn || (pList->p->m_iFlags & HUD_ACTIVE) && !(m_iHideHUDDisplay & HIDEHUD_ALL) )
 					pList->p->Draw(flTime);
 			}
-			else
-			{  // it's an intermission,  so only draw hud elements that are set to draw during intermissions
-				if ( pList->p->m_iFlags & HUD_INTERMISSION )
-					pList->p->Draw( flTime );
+			else {
+				if( (CVAR_GET_FLOAT("cl_hidehudsininterm") && pList->p->m_iFlags & HUD_INTERMISSION)
+					|| !CVAR_GET_FLOAT("cl_hidehudsininterm") ) {
+						pList->p->Draw( flTime );
+						if( CVAR_GET_FLOAT("cl_showinterstats") ) {
+							char pMyShotStats[512];
+							sprintf( pMyShotStats, "[Glock fired: %i] [Mp5 fired: %i] [357 fired: %i] [Shotgun shells fired: %i]",
+								gMyShotStats[1], gMyShotStats[2], gMyShotStats[3], gMyShotStats[4] );
+							gEngfuncs.pfnDrawSetTextColor( 1, 0, 0 );
+							gEngfuncs.pfnDrawConsoleString( ((ScreenWidth/2)-(strlen(pMyShotStats)*3.5)), ScreenHeight-32, pMyShotStats );
+						}
+				}
 			}
 
 			pList = pList->pNext;
@@ -153,6 +167,7 @@ int CHud :: Redraw( float flTime, int intermission )
 	}
 
 	// are we in demo mode? do we need to draw the logo in the top corner?
+
 	if (m_iLogo)
 	{
 		int x, y, i;
@@ -208,6 +223,10 @@ void ScaleColors( int &r, int &g, int &b, int a )
 
 int CHud :: DrawHudString(int xpos, int ypos, int iMaxX, char *szIt, int r, int g, int b )
 {
+	if( CVAR_GET_FLOAT("cl_usenewdrawhudstring") ) { //we want to draw the string with new style
+		gpFonts.DrawHudString( xpos, ypos, szIt, r, g, b, 255 );
+		return 1;
+	}
 	// draw the string until we hit the null character or a newline character
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
@@ -226,6 +245,10 @@ int CHud :: DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int
 {
 	char szString[32];
 	sprintf( szString, "%d", iNumber );
+	if( CVAR_GET_FLOAT("cl_usenewdrawhudstring") ) { //we want to draw the string with new style
+		gpFonts.DrawHudString( xpos, ypos, szString, r, g, b, 255 );
+		return 1;
+	}
 	return DrawHudStringReverse( xpos, ypos, iMinX, szString, r, g, b );
 
 }
@@ -247,7 +270,10 @@ int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString,
 			return xpos;
 		xpos = next;
 
-		TextMessageDrawChar( xpos, ypos, *szIt, r, g, b );
+		if( CVAR_GET_FLOAT("cl_usenewdrawhudstring") ) { //we want to draw the string with new style
+			gpFonts.DrawHudString( xpos, ypos, (char*)(*szIt), r, g, b, 255 );
+		}
+		else TextMessageDrawChar( xpos, ypos, *szIt, r, g, b );
 	}
 
 	return xpos;
@@ -345,6 +371,4 @@ int CHud::GetNumWidth( int iNumber, int iFlags )
 
 	return 3;
 
-}	
-
-
+}

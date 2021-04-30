@@ -8,12 +8,8 @@
 // studio_model.cpp
 // routines for setting up to draw 3DStudio models
 
-#include "renderfuncs.h"
-#include "pmtrace.h"
+#include "sharpfuncs.h"
 #include "studio_util.h"
-//#include <Windows.h>
-#include <GL\GL.h>
-#include <GL\GLU.h>
 
 #pragma comment( lib, "opengl32.lib" )
 
@@ -1387,8 +1383,6 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 		return 0;
 
 	m_pRenderModel = IEngineStudio.SetupPlayerModel( m_nPlayerIndex );
-	//m_pRenderModel->name = "models/player/hgrunt/hgrunt.mdl";
-	//strcpy( m_pRenderModel->name, "models/player/hgrunt/hgrunt.mdl" );
 	if (m_pRenderModel == NULL)
 		return 0;
 
@@ -1503,7 +1497,7 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 				else
 					pWeapBoxColors[0] = 255; pWeapBoxColors[1] = pWeapBoxColors[2] = 0;
 				iFlashStatus = !iFlashStatus;
-				m_flFlashTime - gEngfuncs.GetClientTime()+1;
+				m_flFlashTime = gEngfuncs.GetClientTime()+1;
 			}
 			lighting.color = Vector( pWeapBoxColors[0], pWeapBoxColors[1], pWeapBoxColors[2] );
 		}
@@ -1511,7 +1505,7 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 		bAmISpec = gEngfuncs.GetLocalPlayer()->curstate.spectator;
 
 		if( CVAR_GET_FLOAT("cl_specwh") && gEngfuncs.GetLocalPlayer()->curstate.spectator ) {
-			if( CVAR_GET_FLOAT("cl_flashplayer") ) gEngfuncs.Cvar_SetValue( "cl_flashplayer", 0.0 );
+			if( CVAR_GET_FLOAT("cl_flashplayer") ) gEngfuncs.Cvar_SetValue( "cl_flashplayer", 0 );
 			if( CVAR_GET_FLOAT("r_forcerendercolors") != 0 ) gEngfuncs.Cvar_SetValue( "r_forcerendercolors", 0 );
 			pTracePlayer = gEngfuncs.PM_TraceLine( gEngfuncs.GetLocalPlayer()->origin, m_pCurrentEntity->origin, 1, 2, -1 );
 			if( pTracePlayer->fraction == 1.0 ) {
@@ -1530,14 +1524,14 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 		// get remap colors
 		m_nTopColor = m_pPlayerInfo->topcolor;
 		m_nBottomColor = m_pPlayerInfo->bottomcolor;
-		if (m_nTopColor < 0)
+		/*if (m_nTopColor < 0)
 			m_nTopColor = 0;
 		if (m_nTopColor > 360)
 			m_nTopColor = 360;
 		if (m_nBottomColor < 0)
 			m_nBottomColor = 0;
 		if (m_nBottomColor > 360)
-			m_nBottomColor = 360;
+			m_nBottomColor = 360;*/
 
 		IEngineStudio.StudioSetRemapColors( m_nTopColor, m_nBottomColor );
 
@@ -1700,9 +1694,6 @@ void CStudioModelRenderer::StudioRenderFinal_Software( void )
 	IEngineStudio.RestoreRenderer();
 }
 
-color24 pWeapRenderColors;
-INT iPlus = 1;
-
 /*
 ====================
 StudioRenderFinal_Hardware
@@ -1759,6 +1750,11 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware( void )
 	else{
 		gEngfuncs.GetViewModel()->curstate.renderfx = kRenderFxNone;
 	}
+	if( CVAR_GET_FLOAT("cl_transparent_wpnmodels") ) {
+		gEngfuncs.GetViewModel()->curstate.rendermode = kRenderTransAdd;
+	}
+	else gEngfuncs.GetViewModel()->curstate.rendermode = kRenderNormal;
+
 	IEngineStudio.RestoreRenderer();
 }
 

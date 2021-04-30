@@ -1503,6 +1503,10 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 				
 		m_pSpectatorPanel->m_CurrentTime->setText( szText ); */
 
+		//++ BulliT 
+			m_pSpectatorPanel->m_CurrentTime->setText(gHUD.m_Timer.m_szTime);
+		//-- Martin Webrant
+
 		// update spectator panel
 		gViewPort->m_pSpectatorPanel->Update();
 	}

@@ -7,11 +7,13 @@
 
 // Triangle rendering, if any
 
-#include "renderfuncs.h"
+#include "sharpfuncs.h"
 
 // Triangle rendering apis are in gEngfuncs.pTriAPI
 
 extern CRenderFuncs gpRenderFuncs;
+
+#define MAX_TRACELINES 100
 
 #define DLLEXPORT __declspec( dllexport )
 
@@ -89,8 +91,6 @@ void Draw_Triangles( void )
 
 #endif
 
-//color24* newColors;
-
 /*
 =================
 HUD_DrawNormalTriangles
@@ -101,23 +101,10 @@ Non-transparent triangles-- add them here
 void DLLEXPORT HUD_DrawNormalTriangles( void )
 {
 	gHUD.m_Spectator.DrawOverview();
-	/*model_s* pMap = IEngineStudio.GetModelByIndex(1);
-	IEngineStudio.SetRenderModel( pMap );
-	IEngineStudio.SetForceFaceFlags( STUDIO_NF_FULLBRIGHT );
-	IEngineStudio.SetRenderModel( pMap );*/
-	if( CVAR_GET_FLOAT("r_glwireframe") == 1 ) {
-		gpRenderFuncs.WireframeForModel( IEngineStudio.GetModelByIndex(1) );
-	}
-	if( CVAR_GET_FLOAT("r_glwireframe") == 2 ) {
-		model_s* pMap = IEngineStudio.GetModelByIndex(1);
-		for( int i = 0; i < pMap->numtextures; i++ ) {
-			IEngineStudio.SetRenderModel( pMap );
-			pMap->textures[i]->width = pMap->textures[i]->height = 1;
-			strcpy( pMap->textures[i]->name, "sky" );
-			IEngineStudio.SetRenderModel( pMap );
-		}
-		gpRenderFuncs.WireframeForModel( pMap );
-	}
+
+	gpRenderFuncs.DrawTrace();
+	//gpRenderFuncs.DrawTriTrace(); //triapi wont work, triapi sux, triapi must die
+
 #if defined( TEST_IT )
 //	Draw_Triangles();
 #endif
@@ -132,7 +119,6 @@ Render any triangles with transparent rendermode needs here
 */
 void DLLEXPORT HUD_DrawTransparentTriangles( void )
 {
-
 #if defined( TEST_IT )
 //	Draw_Triangles();
 #endif

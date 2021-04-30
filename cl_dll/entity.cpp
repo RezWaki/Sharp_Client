@@ -68,7 +68,6 @@ int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *mode
 	case ET_TEMPENTITY:
 			if( CVAR_GET_FLOAT("cl_disabledynamiclights") ) {
 				ent->curstate.effects = NULL;
-				ent->baseline.effects = NULL;
 			}
 		break;
 	case ET_FRAGMENTED:
@@ -147,7 +146,7 @@ void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct 
 	dst->animtime				= src->animtime;
 	
 	dst->solid					= src->solid;
-	
+
 	dst->rendermode				= src->rendermode;
 	dst->renderamt				= src->renderamt;	
 	dst->rendercolor.r			= src->rendercolor.r;

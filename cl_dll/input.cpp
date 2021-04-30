@@ -57,6 +57,9 @@ void V_Init( void );
 void VectorAngles( const float *forward, float *angles );
 int CL_ButtonBits( int );
 
+BOOL bJumpState = FALSE, bDuckState = FALSE, bToggleDuckState = FALSE, bToggleWalkState = FALSE;
+FLOAT iLastDuckTime = 0;
+
 // xxx need client dll function to get and clear impuse
 extern cvar_t *in_joystick;
 
@@ -499,6 +502,17 @@ void IN_Alt1Up(void) {KeyUp(&in_alt1);}
 void IN_GraphDown(void) {KeyDown(&in_graph);}
 void IN_GraphUp(void) {KeyUp(&in_graph);}
 
+void IN_ToggleDuck( void ) {
+	if( !bToggleDuckState ) KeyDown(&in_duck);
+	else KeyUp( &in_duck );
+	bToggleDuckState = !bToggleDuckState;
+}
+void IN_ToggleWalk( void ) {
+	if( !bToggleWalkState ) KeyDown(&in_speed);
+	else KeyUp( &in_speed );
+	bToggleWalkState = !bToggleWalkState;
+}
+
 void IN_AttackDown(void)
 {
 	KeyDown( &in_attack );
@@ -669,9 +683,6 @@ void CL_AdjustAngles ( float frametime, float *viewangles )
 		viewangles[ROLL] = -50;
 }
 
-BOOL bJumpState = FALSE, bDuckState = FALSE;
-FLOAT iDuckFactor = 0.0;
-
 /*
 ================
 CL_CreateMove
@@ -784,7 +795,7 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 	{
 		VectorCopy( oldangles, cmd->viewangles );
 	}
-	if( GetAsyncKeyState(VK_SPACE) && active ) {
+	if( GetAsyncKeyState(VK_SPACE) ) {
 		if( CVAR_GET_FLOAT("cl_autobhop") == 2 ) { //fps dependent bhop
 			bJumpState = !bJumpState;
 			if( CVAR_GET_FLOAT("cl_autobhop") && !bJumpState ) {
@@ -799,21 +810,14 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 			}
 		}
 	}
-	if( GetAsyncKeyState(VK_MENU) && active ) {
+	if( GetAsyncKeyState(VK_MENU) ) {
 		bDuckState = !bDuckState;
-		if( CVAR_GET_FLOAT("cl_slide") == 1 && !bDuckState ) {
-			for( INT i = 0; i <= 1000000; i++ );
+		if( CVAR_GET_FLOAT("cl_slide") == 1 && gEngfuncs.GetClientTime() > iLastDuckTime ) {
 			cmd->buttons |= IN_DUCK;
+			iLastDuckTime = gEngfuncs.GetClientTime()+CVAR_GET_FLOAT("cl_slide_interval");
 		}
-		if( CVAR_GET_FLOAT("cl_slide") == 2 ) {
-			iDuckFactor += 0.1;
-			if( iDuckFactor >= CVAR_GET_FLOAT("cl_slidefactor") ) {
-				cmd->buttons |= IN_DUCK;
-				iDuckFactor = 0.0;
-			}
-		}
-		if( CVAR_GET_FLOAT("cl_slide") == 3 && !bDuckState ) { //dd
-			cmd->buttons |= IN_DUCK;
+		if( CVAR_GET_FLOAT("cl_slide") == 2 && !bDuckState ) { //dd, might depend on fps so sux
+			cmd->buttons |= IN_DUCK; //use above better
 		}
 	}
 }
@@ -1030,6 +1034,8 @@ void InitInput (void)
 	gEngfuncs.pfnAddCommand ("-graph", IN_GraphUp);
 	gEngfuncs.pfnAddCommand ("+break",IN_BreakDown);
 	gEngfuncs.pfnAddCommand ("-break",IN_BreakUp);
+	gEngfuncs.pfnAddCommand( "toggleduck", IN_ToggleDuck );
+	gEngfuncs.pfnAddCommand( "togglespeed", IN_ToggleWalk );
 
 	lookstrafe			= gEngfuncs.pfnRegisterVariable ( "lookstrafe", "0", FCVAR_ARCHIVE );
 	lookspring			= gEngfuncs.pfnRegisterVariable ( "lookspring", "0", FCVAR_ARCHIVE );
@@ -1043,9 +1049,6 @@ void InitInput (void)
 	cl_movespeedkey		= gEngfuncs.pfnRegisterVariable ( "cl_movespeedkey", "0.3", 0 );
 	cl_pitchup			= gEngfuncs.pfnRegisterVariable ( "cl_pitchup", "89", 0 );
 	cl_pitchdown		= gEngfuncs.pfnRegisterVariable ( "cl_pitchdown", "89", 0 );
-	CVAR_CREATE( "cl_autobhop", "0", NULL );
-	CVAR_CREATE( "cl_slide", "2", NULL );
-	CVAR_CREATE( "cl_slidefactor", "0.2", NULL );
 
 	cl_vsmoothing		= gEngfuncs.pfnRegisterVariable ( "cl_vsmoothing", "0.05", FCVAR_ARCHIVE );
 

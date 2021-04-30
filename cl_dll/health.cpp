@@ -22,15 +22,13 @@
 #include "STDLIB.H"
 #include "MATH.H"
 
-#include "hud.h"
-#include "cl_util.h"
+#include "sharpfuncs.h"
 #include "parsemsg.h"
 #include "vgui_TeamFortressViewport.h"
-#include "com_model.h"
 #include "r_studioint.h"
 #include "screenfade.h"
 #include <string.h>
-#include <Windows.h>
+#include <ctime>
 
 extern BOOL bCrosshairMustBeRed;
 extern BOOL bAmISpec;
@@ -42,6 +40,8 @@ extern int pTeamColors[5][3];
 //extern char* g_iSpecName;
 //extern Vector dmg_vec;
 //extern int iHudTimerPos;
+extern CRenderFuncs gpRenderFuncs;
+extern CFonts gpFonts;
 extern extra_player_info_t  g_PlayerExtraInfo[MAX_PLAYERS+1];
 extern engine_studio_api_t IEngineStudio;
 
@@ -97,6 +97,9 @@ int CHudHealth::Init(void)
 
 
 	gHUD.AddHudElem(this);
+
+	this->bMustBeDrawn = TRUE; //we must draw it in any way, even if the stars are falling
+
 	return 1;
 }
 
@@ -112,6 +115,9 @@ void CHudHealth::Reset( void )
 	{
 		m_dmg[i].fExpire = 0;
 	}
+
+	m_iFlags &= ~HUD_ACTIVE;
+
 }
 
 int CHudHealth::VidInit(void)
@@ -132,7 +138,7 @@ int CHudHealth:: MsgFunc_Health(const char *pszName,  int iSize, void *pbuf )
 	BEGIN_READ( pbuf, iSize );
 	int x = READ_BYTE();
 
-	m_iFlags |= HUD_ACTIVE;
+	m_iFlags = HUD_ACTIVE;
 
 	// Only update the fade if we've changed health
 	if (x != m_iHealth)
@@ -161,8 +167,11 @@ int CHudHealth:: MsgFunc_Damage(const char *pszName,  int iSize, void *pbuf )
 	UpdateTiles(gHUD.m_flTime, bitsDamage);
 
 	// Actually took damage?
-	if ( damageTaken > 0 || armor > 0 )
+	if ( damageTaken > 0 || armor > 0 ) {
+		//gpRenderFuncs.DrawDamageTrace( vecFrom );
 		CalcDamageDirection(vecFrom);
+	}
+
 
 	return 1;
 }
@@ -197,21 +206,42 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 #endif 
 }
 
-char pFrags[256], pTeamInfo[256], pTimerInfo[256];
-INT pCrossColors[3];
-INT pHudColors[4];
-INT pSpecPlayers[2];
-INT iStartHeight[2] = { 1, 1 };
-FLOAT iClTime = 0.0, bFirst = 1;
+char pFrags[256], pTeamInfo[256], pTimerInfo[256], pRealTimer[64];
+INT pCrossColors[3], pHudColors[4], pSpecPlayers[2], iStartHeight[2] = { 1, 1 };
+INT pTimerStrLen = 0;
+FLOAT pTimerPos[2] = { 0, 0 };
+FLOAT iClTime = 0.0, bFirst = 1, m_flRealTimer = 0.0;
 SpriteHandle_t sBackgroundSprite, sPlayerFlag;
 hud_player_info_t* pPlayerInfo[2];
 std::string pTempWeapon;
+time_t tRealTime; tm* realtime;
 
 int CHudHealth::Draw(float flTime)
 {
 	int r, g, b;
 	int a = 0, x, y;
 	int HealthWidth;
+
+	if( CVAR_GET_FLOAT("cl_clocks") ) {
+		if( gEngfuncs.GetClientTime() > m_flRealTimer ) {
+			tRealTime = time( NULL );
+			realtime = localtime( &tRealTime );
+			//fucking hell below
+			sprintf( pRealTimer, CVAR_GET_FLOAT("cl_clocks_fmt") ? "%02i%s%02i%s%02i" : "%02i%s%02i%s%02i %s",
+				CVAR_GET_FLOAT("cl_clocks_fmt") ? realtime->tm_hour : abs((realtime->tm_hour > 12 ? realtime->tm_hour-12 : realtime->tm_hour)),
+				CVAR_GET_STRING("cl_clocks_del"), realtime->tm_min,
+				CVAR_GET_STRING("cl_clocks_del"), realtime->tm_sec,
+				CVAR_GET_FLOAT("cl_clocks_fmt") != 1 ? (realtime->tm_hour < 12 ? "AM" : "PM") : NULL );
+			m_flRealTimer = gEngfuncs.GetClientTime()+1;
+		}
+		sscanf( CVAR_GET_STRING("cl_clocks_pos"), "%f %f", &pTimerPos[0], &pTimerPos[1] );
+		pTimerPos[0] *= ScreenWidth;
+		pTimerPos[1] *= ScreenHeight;
+		pTimerStrLen = 0;
+		for( INT i = 0; i < strlen(pRealTimer); i++ )
+			pTimerStrLen += gHUD.m_scrinfo.charWidths[ pRealTimer[i] ];
+		gHUD.DrawHudString( pTimerPos[0]-(pTimerStrLen/2), pTimerPos[1], ScreenWidth, pRealTimer, pHudColors[0], pHudColors[1], pHudColors[2] );
+	}
 
 	if( CVAR_GET_FLOAT("cl_spechud") == 1 && bAmISpec ) {
 		if( !CVAR_GET_FLOAT("cl_specbk") ) {
@@ -240,6 +270,7 @@ int CHudHealth::Draw(float flTime)
 		}
 	}
 	if( CVAR_GET_FLOAT("cl_spechud") > 1 && g_TeamInfo[1].teamnumber && g_TeamInfo[2].teamnumber ) {
+		this->m_iFlags |= HUD_ACTIVE;
 		for( INT y = 0; y <= 32; y++ ) {
 			if( (g_PlayerExtraInfo[y].teamnumber == g_TeamInfo[1].teamnumber) && !g_PlayerInfoList[y].spectator ) {
 				#ifdef _DEBUG
@@ -267,7 +298,6 @@ int CHudHealth::Draw(float flTime)
 										gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][2], 255 );
 				#endif
 				if( CVAR_GET_FLOAT("cl_spechud") == 3 ) {
-					//if( g_PlayerInfoList[y].spectator ) continue;
 					gEngfuncs.pfnDrawSetTextColor( (float)gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][0]/255,
 											(float)gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][1]/255,
 											(float)gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][2]/255 );
@@ -314,7 +344,8 @@ int CHudHealth::Draw(float flTime)
 	sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i %i", &pHudColors[0], &pHudColors[1], &pHudColors[2], &pHudColors[3] );
 	if( CVAR_GET_FLOAT("cl_newhud") ) {
 		if( !bAmISpec && !gEngfuncs.GetLocalPlayer()->curstate.spectator ) {
-			gHUD.DrawHudString( (ScreenWidth/2)-(4*strlen( gHUD.RemoveColors(CVAR_GET_STRING("name")) )), ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, ScreenWidth, (char*)gHUD.RemoveColors(CVAR_GET_STRING("name")), 255-(m_iHealth*2.55), m_iHealth*2.55, 0 );
+			if( CVAR_GET_FLOAT("cl_drawmyname") )
+				gHUD.DrawHudString( (ScreenWidth/2)-(4*strlen( gHUD.RemoveColors(CVAR_GET_STRING("name")) )), ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, ScreenWidth, (char*)gHUD.RemoveColors(CVAR_GET_STRING("name")), 255-(m_iHealth*2.55), m_iHealth*2.55, 0 );
 			gHUD.DrawHudNumber( 24, ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, pHudColors[0], pHudColors[1], pHudColors[2] );
 			if( gHUD.m_Teamplay ) {
 				sprintf( pTeamInfo, "Your team: %s", g_PlayerExtraInfo[gEngfuncs.GetLocalPlayer()->index].teamname );
@@ -323,7 +354,7 @@ int CHudHealth::Draw(float flTime)
 		}
 	}
 
-	if( CVAR_GET_FLOAT("cl_drawteams") && CVAR_GET_FLOAT("cl_spechud") < 2 ) {
+	if( CVAR_GET_FLOAT("cl_drawteams") && CVAR_GET_FLOAT("cl_spechud") < 2 && gHUD.m_Teamplay ) {
 		FillRGBA(0, 0, 128, 20, gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][0],
 										gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][1],
 										gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][2], 150);
@@ -332,7 +363,7 @@ int CHudHealth::Draw(float flTime)
 										gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][2], 150);
 		gHUD.DrawHudString(0, 0, 128, g_TeamInfo[1].name, 255, 255, 255);
 		gHUD.DrawHudString(0, 18, 128, g_TeamInfo[2].name, 255, 255, 255);
-		if(CVAR_GET_FLOAT("cl_drawteamscores")){
+		if( CVAR_GET_FLOAT("cl_drawteamscores") ) {
 			sprintf( pFrags, "%i", g_TeamInfo[1].frags );
 			gHUD.DrawHudString(100, 0, ScreenWidth, pFrags, 255, 255, 255 );
 			sprintf( pFrags, "%i", g_TeamInfo[2].frags );
@@ -394,8 +425,8 @@ int CHudHealth::Draw(float flTime)
 		}
 	}
 
-	if ( (gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) || gEngfuncs.IsSpectateOnly() )
-		return 1;
+	//if ( (gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) || gEngfuncs.IsSpectateOnly() )
+	//	return 1;
 		if ( !m_SpriteHandle_t )
 			m_SpriteHandle_t = LoadSprite(PAIN_NAME);
 	if( !CVAR_GET_FLOAT("cl_newhud") ) {

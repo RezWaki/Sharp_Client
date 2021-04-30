@@ -466,4 +466,15 @@ const char* AgGetDirectoryValve()
 	return szDirectory;
 }
 
+AgString AgMapname( void ) {
+  AgString sMap;
+  sMap = gEngfuncs.pfnGetLevelName();
+  if (0 == sMap.size())
+    return sMap;
+
+  sMap = sMap.substr(sMap.find("/")+1);
+  sMap = sMap.substr(0,sMap.find("."));
+  return sMap;
+}
+
 //-- Martin Webrant

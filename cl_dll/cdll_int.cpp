@@ -20,7 +20,7 @@
 
 #include "netadr.h"
 #include "vgui_schememanager.h"
-#include "renderfuncs.h"
+#include "sharpfuncs.h"
 
 extern "C"
 {
@@ -41,6 +41,9 @@ extern "C"
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
 TeamFortressViewport *gViewPort = NULL;
+extern CFonts gpFonts;
+extern cvar_t* g_phud_timer;
+extern cvar_t* g_pcl_liveupdate;
 
 void InitInput (void);
 void EV_HookEvents( void );
@@ -152,57 +155,77 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	memcpy(&gEngfuncs, pEnginefuncs, sizeof(cl_enginefunc_t));
 
-	CVAR_CREATE( "cl_scorecolor", "0 15 20 150", NULL );
-	CVAR_CREATE( "cl_scorehighlight", "1", NULL );
-	CVAR_CREATE( "cl_hudcolorforname", "0", NULL );
-	CVAR_CREATE( "cl_hudcolor", "255 0 0 255", NULL );
-	CVAR_CREATE( "cl_vote_defaultpos", "0", NULL );
-	CVAR_CREATE( "cl_gaussbeam_color", "150 0 255", NULL );
-	CVAR_CREATE( "r_fakedrawentities", "1", NULL );
-	CVAR_CREATE( "cl_hudweapon", "0", NULL );
-	CVAR_CREATE( "cl_smart_crosshair", "1", NULL );
-	CVAR_CREATE( "r_noplayerlights", "0", NULL );
-	CVAR_CREATE( "r_noitemlights", "0", NULL );
-	CVAR_CREATE( "r_forcerendercolors", "0", NULL );
-	CVAR_CREATE( "cl_newhud", "1", NULL );
-	CVAR_CREATE( "cl_usenewteamcolors", "1", NULL );
-	CVAR_CREATE( "cl_hltvmode", "0", NULL );
-	CVAR_CREATE( "r_extrachrome", "1", NULL );
-	CVAR_CREATE( "cl_flashplayer", "0", NULL );
-	CVAR_CREATE( "cl_specwh", "0", NULL );
-	CVAR_CREATE( "cl_itemtimer", "0", NULL );
-	CVAR_CREATE( "cl_rainbowhud", "0", NULL );
-	CVAR_CREATE( "cl_models_subfolder", "1", NULL );
-
-	CVAR_CREATE( "cl_drawteams", "1", NULL );
-	CVAR_CREATE( "cl_drawteamscores", "1", NULL );
-	CVAR_CREATE( "cl_crosshair", "1", NULL );
-	CVAR_CREATE( "cl_crosscolor", "255 255 255", NULL );
-	CVAR_CREATE( "cl_crossdotsize", "4", NULL );
-	CVAR_CREATE( "cl_spechud", "0", NULL );
-	CVAR_CREATE( "cl_specbk", "0", NULL );
-	CVAR_CREATE( "cl_specplayers", "1 2", NULL );
-	CVAR_CREATE( "cl_specteams", "1 2", NULL );
-	CVAR_CREATE( "cl_scorepanel_offsets", "0 0", NULL );
-	CVAR_CREATE( "cl_spechud_offset", "128", NULL );
-	CVAR_CREATE( "cl_damagepunch", "0", NULL );
-	CVAR_CREATE( "cl_disabledynamiclights", "1", NULL );
-	CVAR_CREATE( "cl_forcebeamcolors", "255 0 0", NULL );
-	CVAR_CREATE( "cl_blockclientcmd", "1", NULL );
-	CVAR_CREATE( "cl_smartcrosscolor", "255 0 0", NULL );
-	CVAR_CREATE( "cl_newscoreboard", "0", NULL );
-	CVAR_CREATE( "cl_newscore_offset_x", "0", NULL );
-	CVAR_CREATE( "cl_newscore_offset_y", "0", NULL );
-	CVAR_CREATE( "cl_cross_sprname", "mycrosshair", NULL );
-	CVAR_CREATE( "cl_cross_sprsize", "32", NULL );
-	CVAR_CREATE( "cl_weaponpos", "0 0 0", NULL );
-	CVAR_CREATE( "cl_oldladdersteps", "1", NULL );
-	CVAR_CREATE( "cl_specoffset", "28", NULL );
-	CVAR_CREATE( "cl_drawlogo", "0", NULL );
-	CVAR_CREATE( "cl_logopos", "0 0", NULL );
-	CVAR_CREATE( "cl_autorecord", "1", NULL );
-	//CVAR_CREATE( "cl_duckview_height", "12", NULL );
-	//CVAR_CREATE( "cl_scorepanel_bounds", "512 512", NULL );
+	//NULL flag -> FCVAR_ARCHIVE
+	CVAR_CREATE( "cl_scorecolor", "0 15 20 150", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_scorehighlight", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_hudcolorforname", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_hudcolor", "255 0 0 255", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_vote_defaultpos", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_gaussbeam_color", "150 0 255", FCVAR_ARCHIVE );
+	CVAR_CREATE( "r_fakedrawentities", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_hudweapon", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_smart_crosshair", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "r_noplayerlights", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "r_noitemlights", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "r_forcerendercolors", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_newhud", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_usenewteamcolors", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_hltvmode", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "r_extrachrome", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_flashplayer", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_specwh", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_itemtimer", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_rainbowhud", "0", FCVAR_ARCHIVE );
+	//CVAR_CREATE( "cl_models_subfolder", "1", FCVAR_ARCHIVE );
+	//CVAR_CREATE( "cl_restrictspecs", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_drawteams", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_drawteamscores", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_crosshair", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_crosscolor", "255 255 255", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_crossdotsize", "4", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_spechud", "0", FCVAR_ARCHIVE );
+	//CVAR_CREATE( "cl_specbk", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_specplayers", "1 2", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_specteams", "1 2", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_scorepanel_offsets", "0 0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_spechud_offset", "128", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_damagepunch", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_disabledynamiclights", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_forcebeamcolors", "255 0 0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_blockclientcmd", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_smartcrosscolor", "255 0 0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_newscoreboard", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_newscore_offset_x", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_newscore_offset_y", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_cross_sprname", "mycrosshair", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_cross_sprsize", "32", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_weaponpos", "0 0 0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_oldladdersteps", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_specoffset", "28", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_traceline", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_maxtracelines", "4", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_traceline_color", "255 0 0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_cross_trace", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_autorecord", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_autobhop", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_slide", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_slide_interval", "0.05", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_disablespecs", "0", FCVAR_ARCHIVE ); //ag 6.6
+	CVAR_CREATE( "cl_usenewhudstring", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_drawmyname", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_transparent_wpnmodels", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_hidehudsininterm", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_showscoreboardinintermission", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_showinterstats", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_blackdeathscreen", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_deathcam_height", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_deathcam_angle", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_clocks", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_clocks_pos", "0.5 0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_clocks_fmt", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_clocks_del", ":", FCVAR_ARCHIVE );
+	g_phud_timer = gEngfuncs.pfnRegisterVariable( "hud_timer", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
+	g_pcl_liveupdate = gEngfuncs.pfnRegisterVariable( "cl_liveupdate", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 #ifdef _DEBUG
 	CVAR_CREATE( "r_glwireframecolors", "255 0 0 255", NULL );
 	CVAR_CREATE( "r_glwireframewidth", "4", NULL );
@@ -214,10 +237,12 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	gEngfuncs.pfnClientCmd( "toggleconsole" );
 	gEngfuncs.pfnClientCmd( "clear" );
 	gEngfuncs.pfnClientCmd( pClVersionInfo );
-	gEngfuncs.pfnClientCmd( "echo \"Web-site: http://89.19.174.11/sharp/\"" );
+	gEngfuncs.pfnClientCmd( "echo \"Web-site: http://rezwaki.hldns.ru/sharp/\"" );
 	gEngfuncs.pfnClientCmd( "echo \"GitHub page: https://github.com/RezWaki/Sharp_Client/\"" );
 
 	EV_HookEvents();
+
+	gpFonts.Init();
 
 	return 1;
 }
