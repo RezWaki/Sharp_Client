@@ -37,6 +37,8 @@ extern "C"
 	int		iIsSpectator;
 }
 
+extern INT pPlayerSpeed;
+
 #ifndef M_PI
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
@@ -1618,10 +1620,11 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 
 }
 
-
-
 void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 {
+	gHUD.m_RezSpeedometer.pPlayerSpeed = (INT)sqrt((pparams->simvel[0]*pparams->simvel[0])+(pparams->simvel[1]*pparams->simvel[1]));
+
+
 	// intermission / finale rendering
 	if ( pparams->intermission )
 	{	
