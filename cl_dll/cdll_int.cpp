@@ -31,6 +31,7 @@ extern "C"
 #include "hud_servers.h"
 #include "vgui_int.h"
 #include "interface.h"
+#include "hl_rawinput.h"
 #ifdef _DEBUG
 #include <GL\glew.h>
 #endif
@@ -41,9 +42,11 @@ extern "C"
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
 TeamFortressViewport *gViewPort = NULL;
+BOOL bRawInput = FALSE;
 extern CFonts gpFonts;
 extern cvar_t* g_phud_timer;
 extern cvar_t* g_pcl_liveupdate;
+extern CHLRawInput gHLRawInput;
 
 void InitInput (void);
 void EV_HookEvents( void );
@@ -144,8 +147,6 @@ void DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server )
 	PM_Move( ppmove, server );
 }
 
-char pClVersionInfo[256];
-
 int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 {
 	gEngfuncs = *pEnginefuncs;
@@ -168,23 +169,28 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	CVAR_CREATE( "r_noplayerlights", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "r_noitemlights", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "r_forcerendercolors", "0", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_newhud", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_usenewteamcolors", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_hltvmode", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "r_extrachrome", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_flashplayer", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_specwh", "0", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_itemtimer", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_istimer", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_istimer_mode", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_istimer_wpns", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_istimer_items", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_istimer_offsets", "0 0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_istimer_pos", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_istimer_fmt", "%s: %i", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_rainbowhud", "0", FCVAR_ARCHIVE );
-	//CVAR_CREATE( "cl_models_subfolder", "1", FCVAR_ARCHIVE );
-	//CVAR_CREATE( "cl_restrictspecs", "0", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_drawteams", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_drawteamsboard", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_drawteamscores", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_teamsboard_pos", "0 0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_teamsboard_fntclr", "255 255 255", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_teamsboard_alpha", "150", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_crosshair", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_crosscolor", "255 255 255", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_crossdotsize", "4", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_spechud", "0", FCVAR_ARCHIVE );
-	//CVAR_CREATE( "cl_specbk", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_specplayers", "1 2", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_specteams", "1 2", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_scorepanel_offsets", "0 0", FCVAR_ARCHIVE );
@@ -194,12 +200,8 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	CVAR_CREATE( "cl_forcebeamcolors", "255 0 0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_blockclientcmd", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_smartcrosscolor", "255 0 0", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_newscoreboard", "0", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_newscore_offset_x", "0", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_newscore_offset_y", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_cross_sprname", "mycrosshair", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_cross_sprsize", "32", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_weaponpos", "0 0 0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_oldladdersteps", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_specoffset", "28", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_traceline", "0", FCVAR_ARCHIVE );
@@ -207,16 +209,16 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	CVAR_CREATE( "cl_traceline_color", "255 0 0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_cross_trace", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_autorecord", "1", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_autobhop", "0", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_slide", "1", FCVAR_ARCHIVE );
+	//CVAR_CREATE( "cl_autobhop", "0", FCVAR_ARCHIVE );
+	//CVAR_CREATE( "cl_slide", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_slide_interval", "0.05", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_disablespecs", "0", FCVAR_ARCHIVE ); //ag 6.6
 	CVAR_CREATE( "cl_usenewhudstring", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_drawmyname", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_transparent_wpnmodels", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_hidehudsininterm", "1", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_showscoreboardinintermission", "1", FCVAR_ARCHIVE );
-	CVAR_CREATE( "cl_showinterstats", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_showscrbrdininterm", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_showinterstats", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_blackdeathscreen", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_deathcam_height", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_deathcam_angle", "0", FCVAR_ARCHIVE );
@@ -224,6 +226,10 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	CVAR_CREATE( "cl_clocks_pos", "0.5 0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_clocks_fmt", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_clocks_del", ":", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_speedometer", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_reloadstatus", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_reloadstatus_pos", "0.5 0.5", FCVAR_ARCHIVE );
+	
 	g_phud_timer = gEngfuncs.pfnRegisterVariable( "hud_timer", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 	g_pcl_liveupdate = gEngfuncs.pfnRegisterVariable( "cl_liveupdate", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 #ifdef _DEBUG
@@ -233,16 +239,31 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	glewInit();
 #endif
 
+	char* pClVersionInfo = new char[256];
+	char* pGameWndTitle = new char[256];
 	sprintf( pClVersionInfo, "echo Sharp Client Version [%s]", CL_VER );
+	gEngfuncs.pfnClientCmd("crosshair 0");
 	gEngfuncs.pfnClientCmd( "toggleconsole" );
 	gEngfuncs.pfnClientCmd( "clear" );
 	gEngfuncs.pfnClientCmd( pClVersionInfo );
+	delete[] pClVersionInfo;
 	gEngfuncs.pfnClientCmd( "echo \"Web-site: http://rezwaki.hldns.ru/sharp/\"" );
 	gEngfuncs.pfnClientCmd( "echo \"GitHub page: https://github.com/RezWaki/Sharp_Client/\"" );
 
 	EV_HookEvents();
 
 	gpFonts.Init();
+
+	bRawInput = FALSE;
+	if( gEngfuncs.CheckParm("-rawinput", &pGameWndTitle) ) {
+		for( INT i = 0; i < strlen(pGameWndTitle); i++ )
+			if( pGameWndTitle[i] == '_' ) pGameWndTitle[i] = ' ';
+		if( gHLRawInput.RI_Init( pGameWndTitle ) ) bRawInput = TRUE;
+		else{
+			MessageBoxA( NULL, "Can't use gHLRawInput!\nContinuing with default mouse code...", "Error",
+				MB_ICONERROR );
+		}
+	}
 
 	return 1;
 }
@@ -318,8 +339,10 @@ returns 1 if anything has been changed, 0 otherwise.
 int DLLEXPORT HUD_UpdateClientData(client_data_t *pcldata, float flTime )
 {
 	IN_Commands();
-
-	return gHUD.UpdateClientData(pcldata, flTime );
+	/*char msg[256];
+	sprintf( msg, "flTime: %f\n", flTime );
+	ConsolePrint( msg );*/
+	return gHUD.UpdateClientData( pcldata, flTime );
 }
 
 /*

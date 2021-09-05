@@ -32,7 +32,6 @@ int grgLogoFrame[MAX_LOGO_FRAMES] =
 
 
 extern int g_iVisibleMouse;
-extern FLOAT iLastDuckTime, m_flRealTimer;
 extern INT gMyShotStats[12];
 
 float HUD_GetFOV( void );
@@ -105,8 +104,7 @@ int CHud :: Redraw( float flTime, int intermission )
 		if ( m_iIntermission && !intermission )
 		{
 			//reset all timers on the intermission to prevent some bugs
-			iLastDuckTime = 0;
-			m_flRealTimer = 0;
+
 			// Have to do this here so the scoreboard goes away
 			m_iIntermission = intermission;
 			gViewPort->HideCommandMenu();
@@ -115,11 +113,11 @@ int CHud :: Redraw( float flTime, int intermission )
 		}
 		else if ( !m_iIntermission && intermission ) {
 			m_iIntermission = intermission;
-			if( CVAR_GET_FLOAT("cl_hidehudsinintermission") ) {
+			if( CVAR_GET_FLOAT("cl_hidehudsininterm") ) {
 				gViewPort->HideCommandMenu();
 				gViewPort->HideVGUIMenu();
 			}
-			if( CVAR_GET_FLOAT("cl_showscoreboardinintermission") ) {
+			if( CVAR_GET_FLOAT("cl_showscrbrdininterm") ) {
 				gViewPort->ShowScoreBoard();
 				gViewPort->UpdateSpectatorPanel();
 			}
@@ -151,14 +149,24 @@ int CHud :: Redraw( float flTime, int intermission )
 			else {
 				if( (CVAR_GET_FLOAT("cl_hidehudsininterm") && pList->p->m_iFlags & HUD_INTERMISSION)
 					|| !CVAR_GET_FLOAT("cl_hidehudsininterm") ) {
-						pList->p->Draw( flTime );
-						if( CVAR_GET_FLOAT("cl_showinterstats") ) {
-							char pMyShotStats[512];
-							sprintf( pMyShotStats, "[Glock fired: %i] [Mp5 fired: %i] [357 fired: %i] [Shotgun shells fired: %i]",
-								gMyShotStats[1], gMyShotStats[2], gMyShotStats[3], gMyShotStats[4] );
-							gEngfuncs.pfnDrawSetTextColor( 1, 0, 0 );
-							gEngfuncs.pfnDrawConsoleString( ((ScreenWidth/2)-(strlen(pMyShotStats)*3.5)), ScreenHeight-32, pMyShotStats );
-						}
+					pList->p->Draw( flTime );
+					if( CVAR_GET_FLOAT("cl_showinterstats") ) {
+						char* pMyShotStats = new char[512];
+						char* pMyShotStatsL2 = new char[512];
+						INT width, height;
+						sprintf( pMyShotStats, "[Glock fired: %i] [Mp5 fired: %i] [357 fired: %i] [Shotgun shells fired: %i]",
+							gMyShotStats[1], gMyShotStats[2], gMyShotStats[3], gMyShotStats[4] );
+						sprintf( pMyShotStatsL2, "[Gauss fired: %i] [Crossbow fired: %i] [RPG fired: %i] [Crowbar used: %i]",
+							gMyShotStats[9], gMyShotStats[10], gMyShotStats[11], gMyShotStats[5] );
+						gEngfuncs.pfnDrawSetTextColor( 1, 0, 0 );
+						gEngfuncs.pfnDrawConsoleStringLen( pMyShotStats, &width, &height );
+						gEngfuncs.pfnDrawConsoleString( ScreenWidth/2-width/2, ScreenHeight-32, pMyShotStats );
+						gEngfuncs.pfnDrawSetTextColor( 1, 0, 0 );
+						gEngfuncs.pfnDrawConsoleStringLen( pMyShotStatsL2, &width, &height );
+						gEngfuncs.pfnDrawConsoleString( ScreenWidth/2-width/2, ScreenHeight-32+height, pMyShotStatsL2 );
+						delete[] pMyShotStats;
+						delete[] pMyShotStatsL2;
+					}
 				}
 			}
 

@@ -276,6 +276,12 @@
     <ClCompile Include="sharpfuncs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="rezhuds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="hl_rawinput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ammo.h">
@@ -411,6 +417,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sharpfuncs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rezhuds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="hl_rawinput.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

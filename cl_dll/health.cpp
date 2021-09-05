@@ -28,22 +28,19 @@
 #include "r_studioint.h"
 #include "screenfade.h"
 #include <string.h>
-#include <ctime>
+//#include <ctime>
 
-extern BOOL bCrosshairMustBeRed;
 extern BOOL bAmISpec;
 extern char* pSpecTargetName;
-extern int pShouldDrawTimer;
+//extern int pShouldDrawTimer;
 extern int bShouldShowScoreboard;
-extern float pTimerSeconds;
-extern int pTeamColors[5][3];
+//extern float pTimerSeconds;
+//extern int pTeamColors[5][3];
 //extern char* g_iSpecName;
 //extern Vector dmg_vec;
 //extern int iHudTimerPos;
 extern CRenderFuncs gpRenderFuncs;
 extern CFonts gpFonts;
-extern extra_player_info_t  g_PlayerExtraInfo[MAX_PLAYERS+1];
-extern engine_studio_api_t IEngineStudio;
 
 extern void V_PunchAxis( int axis, float punch );
 
@@ -206,14 +203,7 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 #endif 
 }
 
-char pFrags[256], pTeamInfo[256], pTimerInfo[256], pRealTimer[64];
-INT pCrossColors[3], pHudColors[4], pSpecPlayers[2], iStartHeight[2] = { 1, 1 };
-INT pTimerStrLen = 0;
-FLOAT pTimerPos[2] = { 0, 0 };
-FLOAT iClTime = 0.0, bFirst = 1, m_flRealTimer = 0.0;
-SpriteHandle_t sBackgroundSprite, sPlayerFlag;
 hud_player_info_t* pPlayerInfo[2];
-std::string pTempWeapon;
 time_t tRealTime; tm* realtime;
 
 int CHudHealth::Draw(float flTime)
@@ -222,208 +212,7 @@ int CHudHealth::Draw(float flTime)
 	int a = 0, x, y;
 	int HealthWidth;
 
-	if( CVAR_GET_FLOAT("cl_clocks") ) {
-		if( gEngfuncs.GetClientTime() > m_flRealTimer ) {
-			tRealTime = time( NULL );
-			realtime = localtime( &tRealTime );
-			//fucking hell below
-			sprintf( pRealTimer, CVAR_GET_FLOAT("cl_clocks_fmt") ? "%02i%s%02i%s%02i" : "%02i%s%02i%s%02i %s",
-				CVAR_GET_FLOAT("cl_clocks_fmt") ? realtime->tm_hour : abs((realtime->tm_hour > 12 ? realtime->tm_hour-12 : realtime->tm_hour)),
-				CVAR_GET_STRING("cl_clocks_del"), realtime->tm_min,
-				CVAR_GET_STRING("cl_clocks_del"), realtime->tm_sec,
-				CVAR_GET_FLOAT("cl_clocks_fmt") != 1 ? (realtime->tm_hour < 12 ? "AM" : "PM") : NULL );
-			m_flRealTimer = gEngfuncs.GetClientTime()+1;
-		}
-		sscanf( CVAR_GET_STRING("cl_clocks_pos"), "%f %f", &pTimerPos[0], &pTimerPos[1] );
-		pTimerPos[0] *= ScreenWidth;
-		pTimerPos[1] *= ScreenHeight;
-		pTimerStrLen = 0;
-		for( INT i = 0; i < strlen(pRealTimer); i++ )
-			pTimerStrLen += gHUD.m_scrinfo.charWidths[ pRealTimer[i] ];
-		gHUD.DrawHudString( pTimerPos[0]-(pTimerStrLen/2), pTimerPos[1], ScreenWidth, pRealTimer, pHudColors[0], pHudColors[1], pHudColors[2] );
-	}
-
-	if( CVAR_GET_FLOAT("cl_spechud") == 1 && bAmISpec ) {
-		if( !CVAR_GET_FLOAT("cl_specbk") ) {
-			FillRGBA( 0, 0, ScreenWidth, 64, 0, 0, 0, 255 );
-		}
-		else{
-			sBackgroundSprite = LoadSprite( CVAR_GET_STRING("cl_specbk") );
-			SPR_Set( sBackgroundSprite, 255, 255, 255 );
-			SPR_Draw( 0, 0, 0, NULL );
-		}
-		sscanf( CVAR_GET_STRING("cl_specplayers"), "%i %i", &pSpecPlayers[0], &pSpecPlayers[1] );
-		if( gEngfuncs.GetEntityByIndex(pSpecPlayers[0]) && gEngfuncs.GetEntityByIndex(pSpecPlayers[1])
-			&& gEngfuncs.GetEntityByIndex(pSpecPlayers[0])->curstate.weaponmodel && gEngfuncs.GetEntityByIndex(pSpecPlayers[1])->curstate.weaponmodel ) {
-			r = gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][0];
-			g = gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][1];
-			b = gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][2];
-			pTempWeapon = IEngineStudio.GetModelByIndex(gEngfuncs.GetEntityByIndex(pSpecPlayers[0])->curstate.weaponmodel)->name;
-			gHUD.DrawHudString( strlen(gHUD.RemoveColors(g_PlayerInfoList[pSpecPlayers[0]].name))*5, 0, ScreenWidth, (char*)gHUD.RemoveColors(g_PlayerInfoList[pSpecPlayers[0]].name), r, g, b );
-			gHUD.DrawHudString( strlen(gHUD.RemoveColors(g_PlayerInfoList[pSpecPlayers[0]].name))*5, gHUD.m_iFontHeight, ScreenWidth, (char*)pTempWeapon.substr( 9, pTempWeapon.find_last_of( "." )-9 ).c_str(), r, g, b );
-			r = gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][0];
-			g = gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][1];
-			b = gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][2];
-			pTempWeapon = IEngineStudio.GetModelByIndex(gEngfuncs.GetEntityByIndex(pSpecPlayers[1])->curstate.weaponmodel)->name;
-			gHUD.DrawHudString( ScreenWidth-(strlen(gHUD.RemoveColors(g_PlayerInfoList[pSpecPlayers[1]].name))*12), 0, ScreenWidth, (char*)gHUD.RemoveColors(g_PlayerInfoList[pSpecPlayers[1]].name), r, g, b );
-			gHUD.DrawHudString( ScreenWidth-(strlen(gHUD.RemoveColors(g_PlayerInfoList[pSpecPlayers[1]].name))*12), gHUD.m_iFontHeight, ScreenWidth, (char*)pTempWeapon.substr( 9, pTempWeapon.find_last_of( "." )-9 ).c_str(), r, g, b );
-		}
-	}
-	if( CVAR_GET_FLOAT("cl_spechud") > 1 && g_TeamInfo[1].teamnumber && g_TeamInfo[2].teamnumber ) {
-		this->m_iFlags |= HUD_ACTIVE;
-		for( INT y = 0; y <= 32; y++ ) {
-			if( (g_PlayerExtraInfo[y].teamnumber == g_TeamInfo[1].teamnumber) && !g_PlayerInfoList[y].spectator ) {
-				#ifdef _DEBUG
-						FillRGBA( 0, 64, 128, gHUD.m_iFontHeight*iStartHeight[0], gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][0],
-												gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][1],
-												gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][2], 255 );
-				#endif
-				if( CVAR_GET_FLOAT("cl_spechud") == 3 ) {
-					gEngfuncs.pfnDrawSetTextColor( (float)gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][0]/255,
-											(float)gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][1]/255,
-											(float)gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][2]/255 );
-					gEngfuncs.pfnDrawConsoleString( 0, CVAR_GET_FLOAT("cl_spechud_offset")+(gHUD.m_iFontHeight*iStartHeight[0]), (char*)gHUD.RemoveColors(g_PlayerInfoList[y].name) );
-				}
-				else{
-					gHUD.DrawHudString( 0, CVAR_GET_FLOAT("cl_spechud_offset")+(gHUD.m_iFontHeight*iStartHeight[0]), ScreenWidth, (char*)gHUD.RemoveColors(g_PlayerInfoList[y].name), gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][0],
-											gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][1],
-											gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][2] );
-				}
-				iStartHeight[0]++;
-			}
-			else if( g_PlayerExtraInfo[y].teamnumber == g_TeamInfo[2].teamnumber && !g_PlayerInfoList[y].spectator ) {
-				#ifdef _DEBUG
-				FillRGBA( ScreenWidth-128, 64, 128, gHUD.m_iFontHeight*iStartHeight[1], gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][0],
-										gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][1],
-										gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][2], 255 );
-				#endif
-				if( CVAR_GET_FLOAT("cl_spechud") == 3 ) {
-					gEngfuncs.pfnDrawSetTextColor( (float)gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][0]/255,
-											(float)gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][1]/255,
-											(float)gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][2]/255 );
-					gEngfuncs.pfnDrawConsoleString( ScreenWidth-strlen(gHUD.RemoveColors(g_PlayerInfoList[y].name))*9, CVAR_GET_FLOAT("cl_spechud_offset")+(gHUD.m_iFontHeight*iStartHeight[1]), (char*)gHUD.RemoveColors(g_PlayerInfoList[y].name) );
-				}
-				else{
-					gHUD.DrawHudString( ScreenWidth-strlen(gHUD.RemoveColors(g_PlayerInfoList[y].name))*9, CVAR_GET_FLOAT("cl_spechud_offset")+(gHUD.m_iFontHeight*iStartHeight[1]), ScreenWidth, (char*)gHUD.RemoveColors(g_PlayerInfoList[y].name), gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][0],
-											gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][1],
-											gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][2] );
-				}
-				iStartHeight[1]++;
-			}
-		}
-		iStartHeight[0] = iStartHeight[1] = 1;
-		sprintf( pTeamInfo, "%s: %i", g_TeamInfo[1].name, g_TeamInfo[1].frags );
-		gHUD.DrawHudString(0, 64, ScreenWidth, pTeamInfo, gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][0],
-										gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][1],
-										gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][2]);
-		sprintf( pTeamInfo, "%s: %i", g_TeamInfo[2].name, g_TeamInfo[2].frags );
-		gHUD.DrawHudString(ScreenWidth-strlen(pTeamInfo)*8, 64, ScreenWidth, pTeamInfo, gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][0],
-										gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][1],
-										gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][2]);
-	}
-
-	if( pShouldDrawTimer && CVAR_GET_FLOAT("cl_itemtimer") ) {
-		if( bFirst ) {
-			iClTime = gEngfuncs.GetClientTime();
-			bFirst = FALSE;
-		}
-		if( gEngfuncs.GetClientTime() < iClTime+pTimerSeconds ) {
-			sprintf( pTimerInfo, "Respawn in: %i seconds", (INT)((iClTime+pTimerSeconds)-gEngfuncs.GetClientTime()) );
-			if( !(INT)((iClTime+pTimerSeconds)-gEngfuncs.GetClientTime()) ) {
-				strcpy( pTimerInfo, "Item spawned!" );
-			}
-			gEngfuncs.pfnDrawSetTextColor( pHudColors[0]/255, pHudColors[1]/255, pHudColors[2]/255 );
-			gEngfuncs.pfnDrawConsoleString( ScreenWidth/2, ScreenHeight/6, pTimerInfo );
-		}
-		else if( gEngfuncs.GetClientTime() > iClTime+pTimerSeconds ) {
-			bFirst = TRUE;
-			pShouldDrawTimer = FALSE;
-		}
-	}
-
-	sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i %i", &pHudColors[0], &pHudColors[1], &pHudColors[2], &pHudColors[3] );
-	if( CVAR_GET_FLOAT("cl_newhud") ) {
-		if( !bAmISpec && !gEngfuncs.GetLocalPlayer()->curstate.spectator ) {
-			if( CVAR_GET_FLOAT("cl_drawmyname") )
-				gHUD.DrawHudString( (ScreenWidth/2)-(4*strlen( gHUD.RemoveColors(CVAR_GET_STRING("name")) )), ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, ScreenWidth, (char*)gHUD.RemoveColors(CVAR_GET_STRING("name")), 255-(m_iHealth*2.55), m_iHealth*2.55, 0 );
-			gHUD.DrawHudNumber( 24, ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, pHudColors[0], pHudColors[1], pHudColors[2] );
-			if( gHUD.m_Teamplay ) {
-				sprintf( pTeamInfo, "Your team: %s", g_PlayerExtraInfo[gEngfuncs.GetLocalPlayer()->index].teamname );
-				gHUD.DrawHudString( (ScreenWidth/2)-(4*strlen( pTeamInfo )), 0, ScreenWidth, pTeamInfo, pHudColors[0], pHudColors[1], pHudColors[2] );
-			}
-		}
-	}
-
-	if( CVAR_GET_FLOAT("cl_drawteams") && CVAR_GET_FLOAT("cl_spechud") < 2 && gHUD.m_Teamplay ) {
-		FillRGBA(0, 0, 128, 20, gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][0],
-										gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][1],
-										gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][2], 150);
-		FillRGBA(0, 20, 128, 20, gTeamColors[ g_TeamInfo[1].teamnumber % gNumberOfTeamColors ][0],
-										gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][1],
-										gTeamColors[ g_TeamInfo[2].teamnumber % gNumberOfTeamColors ][2], 150);
-		gHUD.DrawHudString(0, 0, 128, g_TeamInfo[1].name, 255, 255, 255);
-		gHUD.DrawHudString(0, 18, 128, g_TeamInfo[2].name, 255, 255, 255);
-		if( CVAR_GET_FLOAT("cl_drawteamscores") ) {
-			sprintf( pFrags, "%i", g_TeamInfo[1].frags );
-			gHUD.DrawHudString(100, 0, ScreenWidth, pFrags, 255, 255, 255 );
-			sprintf( pFrags, "%i", g_TeamInfo[2].frags );
-			gHUD.DrawHudString(100, 20, ScreenWidth, pFrags, 255, 255, 255 );
-		}
-	}
-
-	sscanf( CVAR_GET_STRING("cl_crosscolor"), "%i %i %i", &pCrossColors[0], &pCrossColors[1], &pCrossColors[2] );
-	if( CVAR_GET_FLOAT("cl_smart_crosshair") && bCrosshairMustBeRed ) {
-		sscanf( CVAR_GET_STRING("cl_smartcrosscolor"), "%i %i %i", &pCrossColors[0], &pCrossColors[1], &pCrossColors[2] );
-	}
-	switch( (INT)CVAR_GET_FLOAT("cl_crosshair") ) {
-		case 1:
-			gEngfuncs.pfnFillRGBA( (ScreenWidth/2)-(CVAR_GET_FLOAT("cl_crossdotsize")/2), (ScreenHeight/2)-(CVAR_GET_FLOAT("cl_crossdotsize")/2), CVAR_GET_FLOAT("cl_crossdotsize"), CVAR_GET_FLOAT("cl_crossdotsize"), pCrossColors[0], pCrossColors[1], pCrossColors[2], 255 );
-		break;
-		case 2:
-			gEngfuncs.pfnFillRGBA( (ScreenWidth/2)-4, (ScreenHeight/2), 10, 2, pCrossColors[0], pCrossColors[1], pCrossColors[2], 255 );
-			gEngfuncs.pfnFillRGBA( (ScreenWidth/2), (ScreenHeight/2)-4, 2, 10, pCrossColors[0], pCrossColors[1], pCrossColors[2], 255 );
-		break;
-		case 3:
-			gEngfuncs.pfnFillRGBA( (ScreenWidth/2)-2, (ScreenHeight/2)-2, 4, 4, pCrossColors[0], pCrossColors[1], pCrossColors[2], 255 );
-			gEngfuncs.pfnFillRGBA( (ScreenWidth/2)-3, (ScreenHeight/2)-3, 6, 6, 0, 255, 0, 255 );
-		break;
-		case 4:
-			gEngfuncs.pfnFillRGBA( (ScreenWidth/2)-10, (ScreenHeight/2)-2, 10, 2, pCrossColors[0], pCrossColors[1], pCrossColors[2], 255 );
-			gEngfuncs.pfnFillRGBA( (ScreenWidth/2)-2, (ScreenHeight/2)-10, 2, 10, pCrossColors[0], pCrossColors[1], pCrossColors[2], 255 );
-		break;
-		case 5:
-			char szCrosshairSprite[64];
-			sprintf( szCrosshairSprite, "sprites/%s.spr", CVAR_GET_STRING("cl_cross_sprname") );
-			SPR_Set( LoadSprite(szCrosshairSprite), pCrossColors[0], pCrossColors[1], pCrossColors[2] );
-			SPR_DrawAdditive( 0, (ScreenWidth/2)-(CVAR_GET_FLOAT("cl_cross_sprsize")/2), (ScreenHeight/2)-(CVAR_GET_FLOAT("cl_cross_sprsize")/2), NULL );
-		break;
-	}
-
-	if( bShouldShowScoreboard ) {
-		char szPlayerInfo[64];
-		int r, g, b;
-		int score_r, score_g, score_b, score_a;
-		int playeroffset = 16;
-		sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i", &r, &g, &b );
-		sscanf(CVAR_GET_STRING("cl_scorecolor"), "%i %i %i", &score_r, &score_g, &score_b, &score_a );
-		gHUD.DrawHudString( (ScreenWidth/2)-strlen( gViewPort->m_szServerName )*4+CVAR_GET_FLOAT("cl_newscore_offset_x"), 16+CVAR_GET_FLOAT("cl_newscore_offset_y"), ScreenWidth, gViewPort->m_szServerName, 255, 255, 255 );
-		FillRGBA( 0, 36+CVAR_GET_FLOAT("cl_newscore_offset_y"), ScreenWidth, ScreenHeight-36, score_r, score_g, score_b, score_a );
-		for( int i = 1; i < MAX_PLAYERS; i++ ) {
-			if( g_PlayerInfoList[i].name != NULL ) {
-				playeroffset += 18;
-				sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i", &r, &g, &b );
-				if( gHUD.m_Teamplay ) {
-					r = pTeamColors[g_PlayerExtraInfo[i].teamnumber % gNumberOfTeamColors][0];
-					g = pTeamColors[g_PlayerExtraInfo[i].teamnumber % gNumberOfTeamColors][1];
-					b = pTeamColors[g_PlayerExtraInfo[i].teamnumber % gNumberOfTeamColors][2];
-				}
-				if( g_PlayerInfoList[i].thisplayer )
-					r = g = b = 255; //highlight myself
-				sprintf( szPlayerInfo, "%s    %s    %i / %i (%i)", g_PlayerExtraInfo[i].teamname, g_PlayerInfoList[i].name, g_PlayerExtraInfo[i].frags, g_PlayerExtraInfo[i].deaths, g_PlayerInfoList[i].ping );
-				gHUD.DrawHudString( (ScreenWidth/2)-strlen(szPlayerInfo)*4+CVAR_GET_FLOAT("cl_newscore_offset_x"), playeroffset+CVAR_GET_FLOAT("cl_newscore_offset_y"), ScreenWidth, szPlayerInfo, r, g, b );
-			}
-		}
-	}
+	sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i %i", &gHUD.pHudColors[0], &gHUD.pHudColors[1], &gHUD.pHudColors[2], &gHUD.pHudColors[3] );
 
 	//if ( (gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH) || gEngfuncs.IsSpectateOnly() )
 	//	return 1;
@@ -464,18 +253,18 @@ int CHudHealth::Draw(float flTime)
 			y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight / 2;
 			x = CrossWidth /2;
 
-			SPR_Set(gHUD.GetSprite(m_HUD_cross), pHudColors[0], pHudColors[1], pHudColors[2]);
+			SPR_Set(gHUD.GetSprite(m_HUD_cross), gHUD.pHudColors[0], gHUD.pHudColors[1], gHUD.pHudColors[2]);
 			SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_cross));
 
 			x = CrossWidth + HealthWidth / 2;
 
-			x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, pHudColors[0], pHudColors[1], pHudColors[2]);
+			x = gHUD.DrawHudNumber(x, y, DHN_3DIGITS | DHN_DRAWZERO, m_iHealth, gHUD.pHudColors[0], gHUD.pHudColors[1], gHUD.pHudColors[2]);
 
 			x += HealthWidth/2;
 
 			int iHeight = gHUD.m_iFontHeight;
 			int iWidth = HealthWidth/10;
-			FillRGBA(x, y, iWidth, iHeight, pHudColors[0], pHudColors[1], pHudColors[2], pHudColors[3]);
+			FillRGBA(x, y, iWidth, iHeight, gHUD.pHudColors[0], gHUD.pHudColors[1], gHUD.pHudColors[2], gHUD.pHudColors[3]);
 		}
 	}
 	DrawDamage(flTime);

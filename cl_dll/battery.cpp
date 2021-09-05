@@ -27,6 +27,8 @@
 
 DECLARE_MESSAGE(m_Battery, Battery)
 
+INT iCurrentBattery = -1;
+
 int CHudBattery::Init(void)
 {
 	m_iBat = 0;
@@ -68,6 +70,16 @@ int CHudBattery:: MsgFunc_Battery(const char *pszName,  int iSize, void *pbuf )
 		m_iBat = x;
 	}
 
+	/*if( CVAR_GET_FLOAT("cl_itemspawntimer") && iCurrentBattery ) {
+		gHUD.m_ItemSpawnTimer.pTimerSeconds[iCurrentBattery] = 31.0; //item 30 sec
+		gHUD.m_ItemSpawnTimer.pShouldDrawTimer[iCurrentBattery] = TRUE;
+		strcpy( gHUD.m_ItemSpawnTimer.item_name[iCurrentBattery], "Battery" );
+		sprintf( pbatinfo, "%i\n", iSize );
+		ConsolePrint( pszName );
+	}
+	iCurrentBattery++;
+	if( iCurrentBattery > 32 ) iCurrentBattery = 0;*/
+
 	return 1;
 }
 
@@ -82,7 +94,8 @@ int CHudBattery::Draw(float flTime)
 	rc = *m_prc2;
 	rc.top  += m_iHeight * ((float)(100-(min(100,m_iBat))) * 0.01);	// battery can go from 0 to 100 so * 0.01 goes from 0 to 1
 
-	sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i %i", &r, &g, &b, &a );
+	//sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i %i", &r, &g, &b, &a );
+	r = gHUD.pHudColors[0]; g = gHUD.pHudColors[1]; b = gHUD.pHudColors[2]; a = gHUD.pHudColors[3];
 
 	if( CVAR_GET_FLOAT("cl_newhud") ) {
 		//FillRGBA( 0, ScreenHeight-(gHUD.m_scrinfo.iCharHeight*2), ScreenWidth, (gHUD.m_scrinfo.iCharHeight*2), 255, 255, 255, 150 );

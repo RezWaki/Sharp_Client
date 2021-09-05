@@ -169,6 +169,7 @@ private:
 
 
 #include "health.h"
+#include "rezhuds.h"
 
 
 #define FADE_TIME 100
@@ -659,6 +660,7 @@ public:
 	int		m_iRes;
 	cvar_t  *m_pCvarStealMouse;
 	cvar_t	*m_pCvarDraw;
+	INT		pHudColors[4];
 
 	int m_iFontHeight;
 	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b );
@@ -667,6 +669,8 @@ public:
 	int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b );
 	int GetNumWidth(int iNumber, int iFlags);
 	const char* RemoveColors( char* pBuf );
+	INT HudStringWidth( char* str );
+	char** SplitString( char* str, char del );
 
 private:
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.
@@ -708,6 +712,14 @@ public:
 	AgHudVote         m_Vote;
 	AgHudCountdown    m_Countdown;
 	AgHudTimer        m_Timer;
+
+	CHudSpeedometer m_RezSpeedometer;
+	CHudClocks		m_Clocks;
+	CItemSpawnTimer m_ItemSpawnTimer;
+	CHudTeamsBoard m_HudTeamsBoard;
+	CCustomCrosshair m_CustomCrosshair;
+	CHudReloadStatus m_ReloadStatus;
+	//CSpectatorHud m_SpectatorHud;
 
 	void Init( void );
 	void VidInit( void );

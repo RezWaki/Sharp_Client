@@ -308,12 +308,12 @@ void SpectatorPanel::EnableInsetView(bool isEnabled)
 	{	
 		// full black bar, no inset border
 		// show banner only in real HLTV mode
-		if ( gEngfuncs.IsSpectateOnly() )
+		/*if ( gEngfuncs.IsSpectateOnly() )
 		{
 			m_TopBanner->setVisible( true );
 			m_TopBanner->setPos( 0,0 );
 		}
-		else
+		else*/
 			m_TopBanner->setVisible( false );
 
 		//m_TopBorder->setBounds( 0, 0, ScreenWidth, YRES(PANEL_HEIGHT) );

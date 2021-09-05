@@ -31,7 +31,7 @@
 #include "demo_api.h"
 #include "vgui_scorepanel.h"
 
-int hud_color[4];
+INT hud_color[4];
 
 class CHLVoiceStatusHelper : public IVoiceStatusHelper
 {
@@ -351,10 +351,18 @@ void CHud :: Init( void )
 	m_Vote.Init();
 	m_Countdown.Init();
 	m_Timer.Init();
+	m_ReloadStatus.Init();
+	//m_SpectatorHud.Init();
 	GetClientVoiceMgr()->Init(&g_VoiceStatusHelper, (vgui::Panel**)&gViewPort);
 
 	m_Menu.Init();
 	
+	m_RezSpeedometer.Init();
+	m_Clocks.Init();
+	m_ItemSpawnTimer.Init();
+	m_HudTeamsBoard.Init();
+	m_CustomCrosshair.Init();
+
 	ServersInit();
 
 	MsgFunc_ResetHUD(0, 0, NULL );
@@ -503,7 +511,15 @@ void CHud :: VidInit( void )
 	m_Vote.VidInit();
 	m_Countdown.VidInit();
 	m_Timer.VidInit();
+	m_ReloadStatus.VidInit();
+	//m_SpectatorHud.VidInit();
 	GetClientVoiceMgr()->VidInit();
+
+	m_RezSpeedometer.VidInit();
+	m_Clocks.VidInit();
+	m_ItemSpawnTimer.VidInit();
+	m_HudTeamsBoard.VidInit();
+	m_CustomCrosshair.VidInit();
 }
 
 int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)
@@ -691,6 +707,14 @@ const char* CHud::RemoveColors( char* pBuf ) {
 		}
 	}
 	return pText.c_str();
+}
+
+INT CHud::HudStringWidth( char* str ) {
+	INT length = 0;
+	for( INT i = 0; i < strlen(str); i++ ) {
+		length += gHUD.m_scrinfo.charWidths[str[i]];
+	}
+	return length;
 }
 
 float CHud::GetSensitivity( void )

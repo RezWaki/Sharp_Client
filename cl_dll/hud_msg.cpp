@@ -25,6 +25,8 @@
 
 extern BEAM *pBeam;
 extern BEAM *pBeam2;
+extern FLOAT iLastDuckTime;
+extern INT gMyShotStats[12];
 
 /// USER-DEFINED SERVER MESSAGE HANDLERS
 
@@ -69,6 +71,16 @@ void CHud :: MsgFunc_InitHUD( const char *pszName, int iSize, void *pbuf )
 			pList->p->InitHUDData();
 		pList = pList->pNext;
 	}
+
+	iLastDuckTime = 0;
+	gHUD.m_Clocks.m_flRealTimer = 0;
+	gHUD.m_ItemSpawnTimer.iLastUsedIndex = 0;
+	for( INT i = 0; i < MAX_IT_ITEMS; i++ ) {
+		gHUD.m_ItemSpawnTimer.bFirst[i] = TRUE;
+		gHUD.m_ItemSpawnTimer.pTimerSeconds[i] = -1;
+		gHUD.m_ItemSpawnTimer.pShouldDrawTimer[i] = FALSE;
+	}
+	for( INT i = 1; i < 11; i++ ) gMyShotStats[i] = 0;
 
 	//Probably not a good place to put this.
 	pBeam = pBeam2 = NULL;

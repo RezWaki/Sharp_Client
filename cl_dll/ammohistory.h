@@ -28,7 +28,6 @@ private:
 	// counts of weapons * ammo
 	WEAPON*		rgSlots[MAX_WEAPON_SLOTS+1][MAX_WEAPON_POSITIONS+1];	// The slots currently in use by weapons.  The value is a pointer to the weapon;  if it's NULL, no weapon is there
 	int			riAmmo[MAX_AMMO_TYPES];							// count of each ammo type
-
 public:
 	void Init( void )
 	{
@@ -112,14 +111,14 @@ private:
 		int iCount;
 		int iId;
 	};
-
 	HIST_ITEM rgAmmoHistory[MAX_HISTORY];
-
+	INT r, g, b;
 public:
 
 	void Init( void )
 	{
 		Reset();
+		sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i", &r, &g, &b );
 	}
 
 	void Reset( void )

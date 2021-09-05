@@ -44,6 +44,7 @@ extern int g_iAlive;
 
 extern int g_weaponselect;
 extern cl_enginefunc_t gEngfuncs;
+char pCommandString[256], pWriteString[256];
 
 int bShouldShowScoreboard = FALSE;
 
@@ -58,6 +59,7 @@ void VectorAngles( const float *forward, float *angles );
 int CL_ButtonBits( int );
 
 BOOL bJumpState = FALSE, bDuckState = FALSE, bToggleDuckState = FALSE, bToggleWalkState = FALSE;
+BOOL bDuckStep = FALSE;
 FLOAT iLastDuckTime = 0;
 
 // xxx need client dll function to get and clear impuse
@@ -84,7 +86,6 @@ cvar_t	*cl_yawspeed;
 cvar_t	*cl_pitchspeed;
 cvar_t	*cl_anglespeedkey;
 cvar_t	*cl_vsmoothing;
-cvar_t	*cl_autobhop;
 /*
 ===============================================================================
 
@@ -132,6 +133,8 @@ kbutton_t	in_alt1;
 kbutton_t	in_score;
 kbutton_t	in_break;
 kbutton_t	in_graph;  // Display the netgraph
+kbutton_t	in_autobhop;
+kbutton_t	in_slide;
 
 typedef struct kblist_s
 {
@@ -332,7 +335,7 @@ void KeyDown (kbutton_t *b)
 		gEngfuncs.Con_DPrintf ("Three keys down for a button '%c' '%c' '%c'!\n", b->down[0], b->down[1], c);
 		return;
 	}
-	
+
 	if (b->state & 1)
 		return;		// still down
 	b->state |= 1 + 2;	// down + impulse down
@@ -386,8 +389,9 @@ Return 1 to allow engine to process the key, otherwise, act on it as needed
 */
 int DLLEXPORT HUD_Key_Event( int down, int keynum, const char *pszCurrentBinding )
 {
-	if (gViewPort)
+	if (gViewPort) {
 		return gViewPort->KeyInput(down, keynum, pszCurrentBinding);
+	}
 	
 	return 1;
 }
@@ -469,17 +473,20 @@ extern void __CmdFunc_InputPlayerSpecial(void);
 void IN_Attack2Down(void) 
 {
 	KeyDown(&in_attack2);
-
 	gHUD.m_Spectator.HandleButtonsDown( IN_ATTACK2 );
 }
 
-void IN_Attack2Up(void) {KeyUp(&in_attack2);}
+void IN_Attack2Up(void) {
+	KeyUp(&in_attack2);
+}
 void IN_UseDown (void)
 {
 	KeyDown(&in_use);
 	gHUD.m_Spectator.HandleButtonsDown( IN_USE );
 }
-void IN_UseUp (void) {KeyUp(&in_use);}
+void IN_UseUp (void) {
+	KeyUp(&in_use);
+}
 
 void IN_JumpDown (void)
 {
@@ -487,14 +494,20 @@ void IN_JumpDown (void)
 	gHUD.m_Spectator.HandleButtonsDown( IN_JUMP );
 
 }
-void IN_JumpUp (void) {KeyUp(&in_jump);}
+void IN_JumpUp (void) {
+	KeyUp(&in_jump);
+}
 void IN_DuckDown(void)
 {
+	bDuckState = FALSE;
 	KeyDown(&in_duck);
 	gHUD.m_Spectator.HandleButtonsDown( IN_DUCK );
 
 }
-void IN_DuckUp(void) {KeyUp(&in_duck);}
+void IN_DuckUp(void) {
+	bDuckState = TRUE;
+	KeyUp(&in_duck);
+}
 void IN_ReloadDown(void) {KeyDown(&in_reload);}
 void IN_ReloadUp(void) {KeyUp(&in_reload);}
 void IN_Alt1Down(void) {KeyDown(&in_alt1);}
@@ -511,6 +524,20 @@ void IN_ToggleWalk( void ) {
 	if( !bToggleWalkState ) KeyDown(&in_speed);
 	else KeyUp( &in_speed );
 	bToggleWalkState = !bToggleWalkState;
+}
+
+void IN_AutoBhopDown( void ) {
+	KeyDown( &in_autobhop );
+}
+void IN_AutoBhopUp( void ) {
+	KeyUp( &in_autobhop );
+}
+
+void IN_SlideDown( void ) {
+	KeyDown( &in_slide );
+}
+void IN_SlideUp( void ) {
+	KeyUp( &in_slide );
 }
 
 void IN_AttackDown(void)
@@ -539,28 +566,16 @@ void IN_Impulse (void)
 void IN_ScoreDown(void)
 {
 	KeyDown(&in_score);
-	if( CVAR_GET_FLOAT("cl_newscoreboard" ) ) {
-		bShouldShowScoreboard = TRUE;
-	}
-	else{
-		if ( gViewPort )
-		{
-			gViewPort->ShowScoreBoard();
-		}
+	if( gViewPort ) {
+		gViewPort->ShowScoreBoard();
 	}
 }
 
 void IN_ScoreUp(void)
 {
 	KeyUp(&in_score);
-	if( CVAR_GET_FLOAT("cl_newscoreboard" ) ) {
-		bShouldShowScoreboard = FALSE;
-	}
-	else{
-		if ( gViewPort )
-		{
-			gViewPort->HideScoreBoard();
-		}
+	if( gViewPort ) {
+		gViewPort->HideScoreBoard();
 	}
 }
 
@@ -683,6 +698,8 @@ void CL_AdjustAngles ( float frametime, float *viewangles )
 		viewangles[ROLL] = -50;
 }
 
+char pMsg[256];
+
 /*
 ================
 CL_CreateMove
@@ -697,16 +714,14 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 	float spd;
 	vec3_t viewangles;
 	static vec3_t oldangles;
+	memset (cmd, 0, sizeof(*cmd));
+	cmd->buttons = CL_ButtonBits( 1 );
 
 	if ( active )
 	{
-		//memset( viewangles, 0, sizeof( vec3_t ) );
-		//viewangles[ 0 ] = viewangles[ 1 ] = viewangles[ 2 ] = 0.0;
 		gEngfuncs.GetViewAngles( (float *)viewangles );
 
 		CL_AdjustAngles ( frametime, viewangles );
-
-		memset (cmd, 0, sizeof(*cmd));
 		
 		gEngfuncs.SetViewAngles( (float *)viewangles );
 
@@ -734,6 +749,18 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 			cmd->forwardmove *= cl_movespeedkey->value;
 			cmd->sidemove *= cl_movespeedkey->value;
 			cmd->upmove *= cl_movespeedkey->value;
+		}
+
+		if( in_slide.state & 1 && gEngfuncs.GetClientTime() > iLastDuckTime  ) {
+			cmd->buttons |= IN_DUCK;
+			iLastDuckTime = gEngfuncs.GetClientTime()+CVAR_GET_FLOAT("cl_slide_interval");
+		}
+
+		if( in_autobhop.state & 1 ) {
+			bJumpState = !bJumpState;
+			if( !bJumpState ) {
+				cmd->buttons |= IN_JUMP;
+			}
 		}
 
 		// clip to maxspeed
@@ -764,7 +791,7 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 	//
 	// set button and flag bits
 	//
-	cmd->buttons = CL_ButtonBits( 1 );
+	//cmd->buttons = CL_ButtonBits( 1 );
 
 	// If they're in a modal dialog, ignore the attack button.
 	if(GetClientVoiceMgr()->IsInSquelchMode())
@@ -794,31 +821,6 @@ void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int activ
 	else
 	{
 		VectorCopy( oldangles, cmd->viewangles );
-	}
-	if( GetAsyncKeyState(VK_SPACE) ) {
-		if( CVAR_GET_FLOAT("cl_autobhop") == 2 ) { //fps dependent bhop
-			bJumpState = !bJumpState;
-			if( CVAR_GET_FLOAT("cl_autobhop") && !bJumpState ) {
-				KeyDown(&in_jump);
-				KeyUp(&in_jump);
-			}
-		}
-		else if( CVAR_GET_FLOAT("cl_autobhop") == 1 ) {
-			bJumpState = !bJumpState;
-			if( CVAR_GET_FLOAT("cl_autobhop") && !bJumpState ) {
-				cmd->buttons |= IN_JUMP;
-			}
-		}
-	}
-	if( GetAsyncKeyState(VK_MENU) ) {
-		bDuckState = !bDuckState;
-		if( CVAR_GET_FLOAT("cl_slide") == 1 && gEngfuncs.GetClientTime() > iLastDuckTime ) {
-			cmd->buttons |= IN_DUCK;
-			iLastDuckTime = gEngfuncs.GetClientTime()+CVAR_GET_FLOAT("cl_slide_interval");
-		}
-		if( CVAR_GET_FLOAT("cl_slide") == 2 && !bDuckState ) { //dd, might depend on fps so sux
-			cmd->buttons |= IN_DUCK; //use above better
-		}
 	}
 }
 
@@ -1036,6 +1038,10 @@ void InitInput (void)
 	gEngfuncs.pfnAddCommand ("-break",IN_BreakUp);
 	gEngfuncs.pfnAddCommand( "toggleduck", IN_ToggleDuck );
 	gEngfuncs.pfnAddCommand( "togglespeed", IN_ToggleWalk );
+	gEngfuncs.pfnAddCommand( "+autobhop", IN_AutoBhopDown );
+	gEngfuncs.pfnAddCommand( "-autobhop", IN_AutoBhopUp );
+	gEngfuncs.pfnAddCommand( "+slide", IN_SlideDown );
+	gEngfuncs.pfnAddCommand( "-slide", IN_SlideUp );
 
 	lookstrafe			= gEngfuncs.pfnRegisterVariable ( "lookstrafe", "0", FCVAR_ARCHIVE );
 	lookspring			= gEngfuncs.pfnRegisterVariable ( "lookspring", "0", FCVAR_ARCHIVE );

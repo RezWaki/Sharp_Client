@@ -20,6 +20,7 @@
 #include "../engine/keydefs.h"
 #include "view.h"
 #include "windows.h"
+#include "hl_rawinput.h"
 
 #define MOUSE_BUTTON_COUNT 5
 
@@ -74,6 +75,8 @@ static int	mouseactive;
 int			mouseinitialized;
 static int	mouseparmsvalid;
 static int	mouseshowtoggle = 1;
+extern BOOL bRawInput;
+extern CHLRawInput gHLRawInput;
 
 // joystick defines and variables
 // where should defines be moved?
@@ -313,27 +316,34 @@ void IN_MouseMove ( float frametime, usercmd_t *cmd)
 	//      move the camera, or if the mouse cursor is visible or if we're in intermission
 	if ( !iMouseInUse && !g_iVisibleMouse && !gHUD.m_iIntermission )
 	{
-		GetCursorPos (&current_pos);
+		if( !bRawInput ) {
+			GetCursorPos (&current_pos);
 
-		mx = current_pos.x - gEngfuncs.GetWindowCenterX() + mx_accum;
-		my = current_pos.y - gEngfuncs.GetWindowCenterY() + my_accum;
+			mx = current_pos.x - gEngfuncs.GetWindowCenterX() + mx_accum;
+			my = current_pos.y - gEngfuncs.GetWindowCenterY() + my_accum;
 
-		mx_accum = 0;
-		my_accum = 0;
+			mx_accum = 0;
+			my_accum = 0;
 
-		if (m_filter->value)
-		{
-			mouse_x = (mx + old_mouse_x) * 0.5;
-			mouse_y = (my + old_mouse_y) * 0.5;
+			if (m_filter->value)
+			{
+				mouse_x = (mx + old_mouse_x) * 0.5;
+				mouse_y = (my + old_mouse_y) * 0.5;
+			}
+			else
+			{
+				mouse_x = mx;
+				mouse_y = my;
+			}
+
+			old_mouse_x = mx;
+			old_mouse_y = my;
 		}
-		else
-		{
-			mouse_x = mx;
-			mouse_y = my;
+		else if( bRawInput ) {
+			mouse_x = gHLRawInput.pos[0];
+			mouse_y = gHLRawInput.pos[1];
+			gHLRawInput.pos[0] = gHLRawInput.pos[1] = 0;
 		}
-
-		old_mouse_x = mx;
-		old_mouse_y = my;
 
 		if ( gHUD.GetSensitivity() != 0 )
 		{
@@ -380,18 +390,6 @@ void IN_MouseMove ( float frametime, usercmd_t *cmd)
 	}
 
 	gEngfuncs.SetViewAngles( (float *)viewangles );
-
-/*
-//#define TRACE_TEST
-#if defined( TRACE_TEST )
-	{
-		int mx, my;
-		void V_Move( int mx, int my );
-		IN_GetMousePos( &mx, &my );
-		V_Move( mx, my );
-	}
-#endif
-*/
 }
 
 /*
@@ -401,6 +399,7 @@ IN_Accumulate
 */
 void DLLEXPORT IN_Accumulate (void)
 {
+	if( bRawInput ) return;
 	//only accumulate mouse if we are not moving the camera with the mouse
 	if ( !iMouseInUse && !g_iVisibleMouse )
 	{

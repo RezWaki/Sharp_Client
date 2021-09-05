@@ -33,7 +33,6 @@ extern "C" int		iJumpSpectator;
 extern "C" float	vJumpOrigin[3];
 extern "C" float	vJumpAngles[3]; 
 
-char* pSpecTargetName;
 
 extern void V_GetInEyePos(int entity, float * origin, float * angles );
 extern void V_ResetChaseCam();
@@ -451,8 +450,6 @@ int CHudSpectator::Draw(float flTime)
 		sprintf(string, "%s", g_PlayerInfoList[i+1].name );
 		
 		lx = strlen(string)*3; // 3 is avg. character length :)
-
-		strcpy( pSpecTargetName, string );
 
 		gEngfuncs.pfnDrawSetTextColor( color[0], color[1], color[2] );
 		DrawConsoleString( m_vPlayerPos[i][0]-lx,m_vPlayerPos[i][1], string);
@@ -1623,3 +1620,4 @@ void CHudSpectator::InitHUDData()
 	// reset HUD FOV
 	gHUD.m_iFOV =  CVAR_GET_FLOAT("default_fov");
 }
+

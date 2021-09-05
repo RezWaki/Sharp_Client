@@ -44,6 +44,9 @@ struct ITEM_INFO
 	wrect_t rect;
 };
 
+INT iCurrentId = 0;
+std::string pAllowed;
+
 void HistoryResource :: AddToHistory( int iType, int iId, int iCount )
 {
 	if ( iType == HISTSLOT_AMMO && !iCount )
@@ -54,19 +57,36 @@ void HistoryResource :: AddToHistory( int iType, int iId, int iCount )
 		// so start from the bottom
 		iCurrentHistorySlot = 0;
 	}
-	
+
 	HIST_ITEM *freeslot = &rgAmmoHistory[iCurrentHistorySlot++];  // default to just writing to the first slot
 	HISTORY_DRAW_TIME = CVAR_GET_FLOAT( "hud_drawhistory_time" );
+
+	if( CVAR_GET_FLOAT("cl_istimer") && CVAR_GET_FLOAT("cl_istimer_wpns")
+	&& iType == HISTSLOT_WEAP ) {
+		CVAR_GET_FLOAT("cl_istimer_mode") ? gHUD.m_ItemSpawnTimer.iLastUsedIndex = 0
+		: gHUD.m_ItemSpawnTimer.iLastUsedIndex++;
+		if( gHUD.m_ItemSpawnTimer.iLastUsedIndex > CVAR_GET_FLOAT("cl_istimer") )
+			gHUD.m_ItemSpawnTimer.iLastUsedIndex = 0;
+		while( gHUD.m_ItemSpawnTimer.pShouldDrawTimer[gHUD.m_ItemSpawnTimer.iLastUsedIndex] ) {
+			gHUD.m_ItemSpawnTimer.iLastUsedIndex++;
+			if( gHUD.m_ItemSpawnTimer.iLastUsedIndex > CVAR_GET_FLOAT("cl_istimer") ) {
+				gHUD.m_ItemSpawnTimer.iLastUsedIndex = 0;
+				break;
+			}
+		}
+		if( !gHUD.m_ItemSpawnTimer.pShouldDrawTimer[gHUD.m_ItemSpawnTimer.iLastUsedIndex] ) {
+			gHUD.m_ItemSpawnTimer.pTimerSeconds[gHUD.m_ItemSpawnTimer.iLastUsedIndex] = 21.0; //weapon 20 sec
+			gHUD.m_ItemSpawnTimer.pShouldDrawTimer[gHUD.m_ItemSpawnTimer.iLastUsedIndex] = TRUE;
+			gHUD.m_ItemSpawnTimer.bFirst[gHUD.m_ItemSpawnTimer.iLastUsedIndex] = TRUE;
+			strcpy( gHUD.m_ItemSpawnTimer.pItemNames[gHUD.m_ItemSpawnTimer.iLastUsedIndex], (char*)(gWR.GetWeapon(iId)->szName+7) );
+		}
+	}
 
 	freeslot->type = iType;
 	freeslot->iId = iId;
 	freeslot->iCount = iCount;
 	freeslot->DisplayTime = gHUD.m_flTime + HISTORY_DRAW_TIME;
 }
-
-std::string pItemName;
-int pShouldDrawTimer = FALSE;
-float pTimerSeconds = 20.0;
 
 void HistoryResource :: AddToHistory( int iType, const char *szName, int iCount )
 {
@@ -83,11 +103,29 @@ void HistoryResource :: AddToHistory( int iType, const char *szName, int iCount 
 
 	// I am really unhappy with all the code in this file
 
-	pItemName = szName;
-
 	int i = gHUD.GetSpriteIndex( szName );
 	if ( i == -1 )
 		return;  // unknown sprite name, don't add it to history
+
+	if( CVAR_GET_FLOAT("cl_istimer") && CVAR_GET_FLOAT("cl_istimer_items") ) {
+		CVAR_GET_FLOAT("cl_istimer_mode") ? gHUD.m_ItemSpawnTimer.iLastUsedIndex = 0
+			: gHUD.m_ItemSpawnTimer.iLastUsedIndex++;
+		if( gHUD.m_ItemSpawnTimer.iLastUsedIndex > CVAR_GET_FLOAT("cl_istimer") )
+			gHUD.m_ItemSpawnTimer.iLastUsedIndex = 0;
+		while( gHUD.m_ItemSpawnTimer.pShouldDrawTimer[gHUD.m_ItemSpawnTimer.iLastUsedIndex] ) {
+			gHUD.m_ItemSpawnTimer.iLastUsedIndex++;
+			if( gHUD.m_ItemSpawnTimer.iLastUsedIndex > CVAR_GET_FLOAT("cl_istimer") ) {
+				gHUD.m_ItemSpawnTimer.iLastUsedIndex = 0;
+				break;
+			}
+		}
+		if( !gHUD.m_ItemSpawnTimer.pShouldDrawTimer[gHUD.m_ItemSpawnTimer.iLastUsedIndex] ) {
+			gHUD.m_ItemSpawnTimer.pTimerSeconds[gHUD.m_ItemSpawnTimer.iLastUsedIndex] = 31.0; //item 30 sec
+			gHUD.m_ItemSpawnTimer.pShouldDrawTimer[gHUD.m_ItemSpawnTimer.iLastUsedIndex] = TRUE;
+			gHUD.m_ItemSpawnTimer.bFirst[gHUD.m_ItemSpawnTimer.iLastUsedIndex] = TRUE;
+			strcpy( gHUD.m_ItemSpawnTimer.pItemNames[gHUD.m_ItemSpawnTimer.iLastUsedIndex], szName+5 );
+		}
+	}
 
 	freeslot->iId = i;
 	freeslot->type = iType;
@@ -125,6 +163,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 {
 	for ( int i = 0; i < MAX_HISTORY; i++ )
 	{
+		r = gHUD.pHudColors[0]; g = gHUD.pHudColors[1]; b = gHUD.pHudColors[2];
 		if ( rgAmmoHistory[i].type )
 		{
 			rgAmmoHistory[i].DisplayTime = min( rgAmmoHistory[i].DisplayTime, gHUD.m_flTime + HISTORY_DRAW_TIME );
@@ -139,10 +178,10 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				wrect_t rcPic;
 				SpriteHandle_t *spr = gWR.GetAmmoPicFromWeapon( rgAmmoHistory[i].iId, rcPic );
 
-				int r, g, b;
-				UnpackRGB(r,g,b, RGB_YELLOWISH);
-				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-				ScaleColors(r, g, b, min(scale, 255) );
+				//int r, g, b;
+				//UnpackRGB(r,g,b, RGB_YELLOWISH);
+				//float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
+				//ScaleColors(r, g, b, min(scale, 255) );
 
 				// Draw the pic
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
@@ -161,6 +200,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 					g = hudColors_random[tempcolor][1];
 					b = hudColors_random[tempcolor][2];
 				}
+
 				gHUD.DrawHudNumberString( xpos - 10, ypos, xpos - 100, rgAmmoHistory[i].iCount, r, g, b );
 			}
 			else if ( rgAmmoHistory[i].type == HISTSLOT_WEAP )
@@ -169,14 +209,6 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 
 				if ( !weap )
 					return 1;  // we don't know about the weapon yet, so don't draw anything
-
-				if( CVAR_GET_FLOAT("cl_itemtimer") && !pShouldDrawTimer ) { //isnt counting something else
-					pTimerSeconds = 20.0; //weapon 20 sec
-					pShouldDrawTimer = TRUE;
-				}
-
-				int r, g, b;
-				UnpackRGB(r,g,b, RGB_YELLOWISH);
 
 				if( CVAR_GET_FLOAT("cl_rainbowhud") == 2 ) {
 					srand( time(NULL) );
@@ -187,12 +219,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				}
 
 				if ( !gWR.HasAmmo( weap ) && !CVAR_GET_FLOAT("cl_rainbowhud") )
-					UnpackRGB(r,g,b, RGB_REDISH);	// if the weapon doesn't have ammo, display it as red
-
-				//if( !CVAR_GET_FLOAT("cl_rainbowhud") ) {
-					float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-					ScaleColors(r, g, b, min(scale, 255) );
-				//}
+					UnpackRGB( r, g, b, RGB_REDISH );	// if the weapon doesn't have ammo, display it as red
 
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
 				int xpos = ScreenWidth - (weap->rcInactive.right - weap->rcInactive.left);
@@ -201,23 +228,10 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 			}
 			else if ( rgAmmoHistory[i].type == HISTSLOT_ITEM )
 			{
-				int r, g, b;
-
 				if ( !rgAmmoHistory[i].iId )
 					continue;  // sprite not loaded
 
-				if( CVAR_GET_FLOAT("cl_itemtimer") && !pShouldDrawTimer ) { //isnt counting something else
-						pTimerSeconds = 30.0; //sweeties 30 sec
-						pShouldDrawTimer = TRUE;
-				}
-
 				wrect_t rect = gHUD.GetSpriteRect( rgAmmoHistory[i].iId );
-
-				if( !CVAR_GET_FLOAT("cl_rainbowhud") ) {
-					UnpackRGB(r,g,b, RGB_YELLOWISH);
-					float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-					ScaleColors(r, g, b, min(scale, 255) );
-				}
 
 				if( CVAR_GET_FLOAT("cl_rainbowhud") == 2 ) {
 					srand( time(NULL) );

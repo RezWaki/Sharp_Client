@@ -368,8 +368,8 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 	int iShot;
 	int tracer;
 
-	if( CVAR_GET_FLOAT("cl_showintermissionstats") ) {
-		gMyShotStats[iBulletType] += cShots;
+	if( CVAR_GET_FLOAT("cl_showinterstats") ) {
+		gMyShotStats[iBulletType]++;
 	}
 
 	for ( iShot = 1; iShot <= cShots; iShot++ )	
@@ -894,6 +894,8 @@ void EV_FireGauss( event_args_t *args )
 		return;
 	}
 
+	gMyShotStats[9]++;
+
 //	Con_Printf( "Firing gauss with %f\n", flDamage );
 	EV_GetGunPosition( args, vecSrc, origin );
 
@@ -1164,6 +1166,8 @@ void EV_Crowbar( event_args_t *args )
 	vec3_t angles;
 	vec3_t velocity;
 
+	gMyShotStats[5]++;
+
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );
 	
@@ -1228,6 +1232,8 @@ void EV_FireCrossbow2( event_args_t *args )
 	vec3_t origin;
 	vec3_t angles;
 	vec3_t velocity;
+
+	gMyShotStats[10]++;
 
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );
@@ -1311,6 +1317,8 @@ void EV_FireCrossbow( event_args_t *args )
 	int idx;
 	vec3_t origin;
 
+	gMyShotStats[10]++;
+
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );
 	
@@ -1352,6 +1360,8 @@ void EV_FireRpg( event_args_t *args )
 {
 	int idx;
 	vec3_t origin;
+
+	gMyShotStats[11]++;
 
 	idx = args->entindex;
 	VectorCopy( args->origin, origin );

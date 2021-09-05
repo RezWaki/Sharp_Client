@@ -99,7 +99,8 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <CustomBuildStep>
-      <Command>copy "$(TargetPath)" "$(SolutionDir)..\..\cl_dlls\client.dll"</Command>
+      <Command>
+      </Command>
       <Outputs>$(SolutionDir)..\..\cl_dlls\client.dll;%(Outputs)</Outputs>
     </CustomBuildStep>
     <Midl>
@@ -150,6 +151,8 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="hl_rawinput.cpp" />
+    <ClCompile Include="rezhuds.cpp" />
     <ClCompile Include="sharpfuncs.cpp" />
     <ClCompile Include="rezglobal.cpp" />
     <ClCompile Include="rezhudcountdown.cpp" />
@@ -242,6 +245,8 @@
     <ClCompile Include="..\game_shared\voice_status.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="hl_rawinput.h" />
+    <ClInclude Include="rezhuds.h" />
     <ClInclude Include="sharpfuncs.h" />
     <ClInclude Include="rezglobal.h" />
     <ClInclude Include="parsemsg.h" />

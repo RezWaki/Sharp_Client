@@ -858,7 +858,7 @@ int CHudAmmo::Draw(float flTime)
 
 	WEAPON *pw = m_pWeapon; // shorthand
 
-	sscanf(CVAR_GET_STRING("cl_hudcolor"), "%i %i %i %i", &r, &g, &b, &a );
+	r = gHUD.pHudColors[0]; g = gHUD.pHudColors[1]; b = gHUD.pHudColors[2]; a = gHUD.pHudColors[3];
 	if( CVAR_GET_FLOAT("cl_newhud") == 2 ) {
 		if( gWR.CountAmmo(pw->iAmmo2Type) > 0 )
 			gHUD.DrawHudNumber( ScreenWidth-gHUD.m_scrinfo.iCharHeight*6, ScreenHeight-gHUD.m_scrinfo.iCharHeight-8, DHN_3DIGITS | DHN_DRAWZERO, gWR.CountAmmo(pw->iAmmo2Type), r, g, b );

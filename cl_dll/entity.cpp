@@ -50,12 +50,6 @@ HUD_AddEntity
 */
 int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname )
 {
-
-	if( !bExecuted ) {
-		gEngfuncs.pfnClientCmd("crosshair 0");
-		bExecuted = TRUE;
-	}
-
 	switch ( type )
 	{
 	case ET_NORMAL:
@@ -66,9 +60,6 @@ int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *mode
 			}
 		break;
 	case ET_TEMPENTITY:
-			if( CVAR_GET_FLOAT("cl_disabledynamiclights") ) {
-				ent->curstate.effects = NULL;
-			}
 		break;
 	case ET_FRAGMENTED:
 	default:

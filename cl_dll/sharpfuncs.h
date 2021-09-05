@@ -21,7 +21,7 @@
 #ifdef _DEBUG
 #include <GL\glew.h>
 #endif
-#define CL_VER "11.0"
+#define CL_VER "12.0"
 #define FNT_SIZE 16
 
 #ifdef _DEBUG
@@ -49,17 +49,17 @@ class CRenderFuncs{
 		void DrawDamageTrace( Vector dmg_origin );
 };
 
-#pragma pack(push, 1) 
-struct bmp_header { 
-	char magic[2];	 
-	INT fileSize; 
-	INT res; 
-	INT offset; 
-	INT header_size; 
-	INT width; 
-	INT height; 
-	INT bits_per_pixel; 
-}; 
+#pragma pack(push, 1)
+struct bmp_header {
+	char magic[2];
+	INT fileSize;
+	INT res;
+	INT offset;
+	INT header_size;
+	INT width;
+	INT height;
+	INT bits_per_pixel;
+};
 #pragma pack(pop)
 
 class CFonts{

@@ -18,7 +18,6 @@ engine_studio_api_t IEngineStudio;
 extern CRenderFuncs gpRenderFuncs;
 
 cvar_s* m_pCvarFakeDrawEntities;
-BOOL bCrosshairMustBeRed = FALSE;
 BOOL bAmISpec = FALSE;
 INT pLightColors[3];
 FLOAT wpn_offsets[3];
@@ -1066,11 +1065,6 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 	IEngineStudio.GetViewInfo( m_vRenderOrigin, m_vUp, m_vRight, m_vNormal );
 	IEngineStudio.GetAliasScale( &m_fSoftwareXScale, &m_fSoftwareYScale );
 
-	if( CVAR_GET_STRING("cl_weaponpos") != "0 0 0" ) {
-		sscanf( CVAR_GET_STRING("cl_weaponpos"), "%f %f %f", &wpn_offsets[0], &wpn_offsets[1], &wpn_offsets[2] );
-		gEngfuncs.GetViewModel()->origin += wpn_offsets;
-	}
-
 	if (m_pCurrentEntity->curstate.renderfx == kRenderFxDeadPlayer)
 	{
 		entity_state_t deadplayer;
@@ -1398,7 +1392,6 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 	{
 		vec3_t orig_angles;
 		m_pPlayerInfo = IEngineStudio.PlayerInfo( m_nPlayerIndex );
-
 		VectorCopy( m_pCurrentEntity->angles, orig_angles );
 	
 		StudioProcessGait( pplayer );
@@ -1570,10 +1563,10 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 			fmt_vec.y = -fmt_vec.y+ScreenHeight/2;
 			if( fmt_vec.x > (ScreenWidth/2)-8 && fmt_vec.x < (ScreenWidth/2)+16
 				&& fmt_vec.y > (ScreenHeight/2)-16 && fmt_vec.y < (ScreenHeight/2)+16 ) {
-					bCrosshairMustBeRed = TRUE;
+					gHUD.m_CustomCrosshair.bCrosshairMustBeRed = TRUE;
 			}
 			else{
-				bCrosshairMustBeRed = FALSE;
+				gHUD.m_CustomCrosshair.bCrosshairMustBeRed = FALSE;
 			}
 		}
 	}
@@ -1730,7 +1723,7 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware( void )
 
 			IEngineStudio.GL_SetRenderMode( rendermode );
 			IEngineStudio.StudioDrawPoints();
-			//IEngineStudio.GL_StudioDrawShadow();
+			IEngineStudio.GL_StudioDrawShadow();
 		}
 	}
 
@@ -1742,8 +1735,10 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware( void )
 	}
 
 	if( CVAR_GET_FLOAT("cl_specwh") && gEngfuncs.GetLocalPlayer()->curstate.spectator ) {
+		glDisable( GL_DEPTH_TEST );
 		glDepthRange( 0.0, 0.5 );
 	}
+	else if( !glIsEnabled( GL_DEPTH_TEST ) ) glEnable( GL_DEPTH_TEST );
 	if( CVAR_GET_FLOAT("r_extrachrome") == 2 ) {
 		gEngfuncs.GetViewModel()->curstate.renderfx = kRenderFxGlowShell;
 	}
