@@ -15,7 +15,4 @@ class CHLRawInput {
 		INT pos[2];
 		BOOL RI_Init( char* window_title );
 		void RI_HookWindow( void );
-		~CHLRawInput( void );
-	private:
-		void CloseHL( void );
 };

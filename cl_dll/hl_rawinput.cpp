@@ -36,13 +36,3 @@ LRESULT CALLBACK RI_WindowProc( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 void CHLRawInput::RI_HookWindow( void ) {
 	hWndProc = (WNDPROC)SetWindowLongA( hTempWnd, GWLP_WNDPROC, (LONG)(LONG_PTR)RI_WindowProc );
 }
-
-CHLRawInput::~CHLRawInput( void ) {
-	CloseHandle( hWindow );
-	CloseHandle( hTempWnd );
-	CloseHL();
-}
-
-void CHLRawInput::CloseHL( void ) {
-	exit( 0 );
-}
