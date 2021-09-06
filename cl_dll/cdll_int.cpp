@@ -264,6 +264,7 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 				MB_ICONERROR );
 		}
 	}
+	delete[] pGameWndTitle;
 
 	return 1;
 }
