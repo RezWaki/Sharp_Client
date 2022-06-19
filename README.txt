@@ -1,5 +1,5 @@
 ==- SHARP CLIENT -==
-    update v12.0
+    update v13.0
 
 This is client library for Half-Life / Adrenaline Gamer mod
 Feel free to use it under AG because it contains all basic AG features
@@ -77,6 +77,10 @@ cfg file either type in console to test, full commands list:
   | cl_reloadstatus_pos | flt flt   | Set ReloadStatus position (1 = max, 0 = min)
   | cl_showinterstats	| 0/1	    | Shows in intermission how much each weapon had been fired
   | cl_blackdeathscreen | 0/1	    | Screen becomes black when you're dead
+  | cl_visualizewg	| 0/1	    | Visualize wallgauss
+  | r_textureid		| 0/int	    | Replace all textures on the map with one specified by id
+  | cl_noplayeranims	| 0/1/2	    | Disable playermodel animations, 1 - all, 2 - legs only
+
 
 
 Other fixes/addins/removes:
@@ -119,3 +123,6 @@ Other fixes/addins/removes:
 	[FIXED] Autobhop & Slide now can be rebound to any key, like it should be,
 		+autobhop for Autobhop & +slide for Slide, e.g. bind "SPACE" "+autobhop"
 	[FIXED] Minor/major optimizations, moved all HUDs into each classes & more...
+	[FIXED] HLKreedz menu bug
+	[FIXED] SmartCrosshair
+	[FIXED] Minor fixes/addins
