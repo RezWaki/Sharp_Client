@@ -36,6 +36,8 @@
 
 static int pm_shared_initialized = 0;
 
+int isMutingSteps = false;
+
 #pragma warning( disable : 4305 )
 
 typedef enum {mod_brush, mod_sprite, mod_alias, mod_studio} modtype_t;
@@ -288,7 +290,7 @@ void PM_PlayStepSound( int step, float fvol )
 	static int iSkipStep = 0;
 	int irand;
 	vec3_t hvel;
-
+	if( isMutingSteps ) return; //do not, if we wanna mute that out (muting sounds is pure evil)
 	pmove->iStepLeft = !pmove->iStepLeft;
 
 	if ( !pmove->runfuncs )
@@ -2546,7 +2548,7 @@ void PM_Jump (void)
 			( pmove->flDuckTime > 0 ) &&
 			Length( pmove->velocity ) > 50 )
 		{
-			pmove->punchangle[0] = -5;
+				pmove->punchangle[0] = -5;
 
 			for (i =0; i < 2; i++)
 			{
