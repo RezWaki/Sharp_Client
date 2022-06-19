@@ -221,6 +221,7 @@ typedef struct cl_enginefuncs_s
 
 	// returns 1 if the client is a spectator only (connected to a proxy), 0 otherwise or 2 if in dev_overview mode
 	int							( *IsSpectateOnly ) ( void );
+	//int								IsSpectateOnly( void ) { return 0; };
 	struct model_s				*( *LoadMapSprite )			( const char *filename );
 
 	// file search functions
