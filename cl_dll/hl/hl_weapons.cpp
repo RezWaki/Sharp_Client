@@ -26,6 +26,7 @@
 #include "pm_defs.h"
 #include "event_api.h"
 #include "r_efx.h"
+#include <string>
 
 #include "../hud_iface.h"
 #include "../com_weapons.h"
@@ -33,6 +34,7 @@
 
 extern globalvars_t *gpGlobals;
 extern int g_iUser1;
+BOOL bIsReloading = FALSE;
 
 // Pool of client side entities/entvars_t
 static entvars_t	ev[ 32 ];
@@ -162,6 +164,7 @@ BOOL CBasePlayerWeapon :: DefaultReload( int iClipSize, int iAnim, float fDelay,
 	SendWeaponAnim( iAnim, UseDecrement(), body );
 
 	m_fInReload = TRUE;
+	bIsReloading = m_fInReload;
 
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 3;
 	return TRUE;
@@ -261,6 +264,7 @@ Put away weapon
 void CBasePlayerWeapon::Holster( int skiplocal /* = 0 */ )
 { 
 	m_fInReload = FALSE; // cancel any reload in progress.
+	bIsReloading = m_fInReload;
 	g_irunninggausspred = false;
 	m_pPlayer->pev->viewmodel = 0; 
 }
@@ -337,6 +341,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 		m_iClip += 10;
 #endif
 		m_fInReload = FALSE;
+		bIsReloading = m_fInReload;
 	}
 
 	if ((m_pPlayer->pev->button & IN_ATTACK2) && (m_flNextSecondaryAttack <= 0.0))
@@ -795,7 +800,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		
 		pCurrent->m_fInReload			= pfrom->m_fInReload;
 		pCurrent->m_fInSpecialReload	= pfrom->m_fInSpecialReload;
-//		pCurrent->m_flPumpTime			= pfrom->m_flPumpTime;
+		//pCurrent->m_flPumpTime		= pfrom->m_flPumpTime;
 		pCurrent->m_iClip				= pfrom->m_iClip;
 		pCurrent->m_flNextPrimaryAttack	= pfrom->m_flNextPrimaryAttack;
 		pCurrent->m_flNextSecondaryAttack = pfrom->m_flNextSecondaryAttack;

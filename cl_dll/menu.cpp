@@ -54,6 +54,7 @@ void CHudMenu :: InitHUDData( void )
 
 void CHudMenu :: Reset( void )
 {
+	m_iShouldDraw = FALSE;
 	g_szPrelocalisedMenuString[0] = 0;
 	m_fWaitingForMore = FALSE;
 }
@@ -65,6 +66,7 @@ int CHudMenu :: VidInit( void )
 
 int CHudMenu :: Draw( float flTime )
 {
+	if( !m_iShouldDraw ) return 0;
 	// check for if menu is set to disappear
 	if ( m_flShutoffTime > 0 )
 	{
@@ -136,13 +138,14 @@ void CHudMenu :: SelectMenuItem( int menu_item )
 // if this message is never received, then scores will simply be the combined totals of the players.
 int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 {
-	char *temp = NULL;
+	char* temp = NULL;
 
 	BEGIN_READ( pbuf, iSize );
 
 	m_bitsValidSlots = READ_SHORT();
 	int DisplayTime = READ_CHAR();
 	int NeedMore = READ_BYTE();
+	m_iShouldDraw = TRUE;
 
 	if ( DisplayTime > 0 )
 		m_flShutoffTime = DisplayTime + gHUD.m_flTime;

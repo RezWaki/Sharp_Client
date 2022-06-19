@@ -105,8 +105,6 @@ public:
 
 	vec3_t				m_cameraOrigin;	// a help camera
 	vec3_t				m_cameraAngles;	// and it's angles
-
-
 private:
 	vec3_t		m_vPlayerPos[MAX_PLAYERS];
 	SpriteHandle_t		m_hsprPlayerBlue;

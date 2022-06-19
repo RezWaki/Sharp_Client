@@ -30,8 +30,12 @@
 #include "demo.h"
 #include "demo_api.h"
 #include "vgui_scorepanel.h"
+#include "triangleapi.h"
 
 INT hud_color[4];
+extern FLOAT iLastDuckTime;
+extern INT gMyShotStats[12];
+extern FLOAT m_gFlGaussDmg[10];
 
 class CHLVoiceStatusHelper : public IVoiceStatusHelper
 {
@@ -365,7 +369,7 @@ void CHud :: Init( void )
 
 	ServersInit();
 
-	MsgFunc_ResetHUD(0, 0, NULL );
+	MsgFunc_ResetHUD( 0, 0, NULL );
 }
 
 // CHud destructor
@@ -696,6 +700,23 @@ void CHud::AddHudElem(CHudBase *phudelem)
 	ptemp->pNext = pdl;
 }
 
+void CHudBase::InitHUDData( void ) {
+	iLastDuckTime = 0;
+	gHUD.m_Clocks.m_flRealTimer = 0;
+	gHUD.m_ItemSpawnTimer.iLastUsedIndex = 0;
+
+	for( INT i = 0; i < MAX_IT_ITEMS; i++ ) {
+		gHUD.m_ItemSpawnTimer.bFirst[i] = TRUE;
+		gHUD.m_ItemSpawnTimer.pTimerSeconds[i] = -1;
+		gHUD.m_ItemSpawnTimer.pShouldDrawTimer[i] = FALSE;
+	}
+	for( INT i = 1; i < 11; i++ ) gMyShotStats[i] = 0;
+	for( INT i = 0; i < 9; i++ ) m_gFlGaussDmg[i] = 0;
+
+	gHUD.ParseSoundList();
+	gHUD.m_Menu.Reset();
+}
+
 const char* CHud::RemoveColors( char* pBuf ) {
 	pText = pBuf;
 	for( int i = 0; i < pText.length(); i++ ) {
@@ -715,6 +736,32 @@ INT CHud::HudStringWidth( char* str ) {
 		length += gHUD.m_scrinfo.charWidths[str[i]];
 	}
 	return length;
+}
+
+void CHud::ParseSoundList( void ) {
+	INT iCurrentItem = 0, iCurrentCursor = 0;
+	char* sounds = CVAR_GET_STRING("s_soundlist");
+	for( INT i = 0; i < strlen(sounds); i++ ) {
+		if( sounds[i] != ';' ) {
+			pSoundList[iCurrentItem][iCurrentCursor] = sounds[i];
+			iCurrentCursor++;
+		}
+		else {
+			pSoundList[iCurrentItem][iCurrentCursor] = '\0';
+			iCurrentCursor = 0;
+			iCurrentItem++;
+		}
+		iMaxSounds = iCurrentItem;
+	}
+}
+
+Vector CHud::ConvertVector( Vector input ) {
+	gEngfuncs.pTriAPI->WorldToScreen( input, pCoords );
+	if( pCoords.x < 1 && pCoords.y < 1 && pCoords.x > -1 && pCoords.y > -1 ) {
+		pCoords.x = ( pCoords[0]*(ScreenWidth/2) )+(ScreenWidth/2);
+		pCoords.y = ( -pCoords[1]*(ScreenHeight/2) )+(ScreenHeight/2);
+	}
+	return pCoords;
 }
 
 float CHud::GetSensitivity( void )

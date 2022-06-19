@@ -1,9 +1,15 @@
 #include "sharpfuncs.h"
+#ifndef M_PI
+	#define M_PI 3.14159265358979323846	// matches value in gcc v2 math.h
+#endif
 
-//extern engine_studio_api_t IEngineStudio;
+#pragma comment( lib, "urlmon.lib" )
+
 extern Vector pVecDrawWeaponsTrace[128];
 extern Vector pVecShootLoc[128];
-//extern cl_enginefunc_t gEngfuncs;
+extern Vector pGaussDmgOrigin[10];
+extern FLOAT m_gFlGaussDmg[10];
+extern INT pIndicatorColors[10];
 INT pTraceLineColors[3];
 Vector pVecXhairTrace, fwd, rgt, up, dest, vwangles;
 
@@ -141,6 +147,63 @@ void CRenderFuncs::DrawTriTrace( void ) {
 		gEngfuncs.pTriAPI->End();
 	}
 }
+
+void CRenderFuncs::DrawDamageTrace( void ) {
+	if( !m_gFlGaussDmg[0] ) return;
+	glBindTexture( GL_TEXTURE_2D, NULL );
+	glEnable( GL_BLEND );
+	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	glColor4ub( 255, 0, 0, 100 );
+
+	for( INT d = 0; m_gFlGaussDmg[d] && d < 9; d++ ) {
+		/*if( pIndicatorColors[d] ) {
+			glColor4ub( 0, 0, 255, 100 );
+			glDisable( GL_DEPTH_TEST );
+		}*/
+		if( pIndicatorColors[d] ) glColor4ub( 0, 0, 255, 100 );
+		double r = m_gFlGaussDmg[d]/2;
+		for( INT i = 0; i <= 10; i++ ) {
+			double lat0 = M_PI*(-0.5+(double)(i-1)/10);
+			double z0 = sin( lat0 );
+			double zr0 = cos( lat0 );
+
+			double lat1 = M_PI*(-0.5+(double)i/10);
+			double z1 = sin( lat1 );
+			double zr1 = cos( lat1 );
+			glBegin( GL_TRIANGLE_STRIP );
+			for( INT j = 0; j <= 10; j++ ) {
+				double lng = 2*M_PI*(double)(j-1)/10;
+				double x = cos( lng );
+				double y = sin( lng );
+
+				glNormal3f((x * zr0)+pGaussDmgOrigin[d].x, (y * zr0)+ pGaussDmgOrigin[d].y, z0+pGaussDmgOrigin[d].z);
+				glVertex3f((r * x * zr0) + pGaussDmgOrigin[d].x, (r* y * zr0) + pGaussDmgOrigin[d].y, (r*z0) + pGaussDmgOrigin[d].z);
+				glNormal3f((x * zr1) + pGaussDmgOrigin[d].x, (y * zr1) + pGaussDmgOrigin[d].y, z1 + pGaussDmgOrigin[d].z);
+				glVertex3f((r* x * zr1) + pGaussDmgOrigin[d].x, (r * y * zr1) + pGaussDmgOrigin[d].y, (r*z1) + pGaussDmgOrigin[d].z);
+			}
+			glEnd();
+		}
+		//if( pIndicatorColors[d] ) glEnable( GL_DEPTH_TEST );
+	}
+}
+
+void CRenderFuncs::DrawCross( Vector origin ) {
+	glBindTexture( GL_TEXTURE_2D, NULL );
+	glColor3ub( 255, 0, 0 );
+	glLineWidth( 3 );
+
+	glBegin( GL_LINES );
+	glVertex3f( origin.x, origin.y, origin.z );
+	glVertex3f( origin.x, origin.y, origin.z+32 );
+	glVertex3f( origin.x, origin.y, origin.z );
+	glVertex3f( origin.x, origin.y+16, origin.z );
+	glVertex3f( origin.x, origin.y, origin.z );
+	glVertex3f( origin.x, origin.y-16, origin.z );
+	glVertex3f( origin.x, origin.y, origin.z );
+	glVertex3f( origin.x, origin.y, origin.z-32 );
+	glEnd();
+}
+	
 
 void CFonts::Init( void ) {
 	struct stat pDirStat;

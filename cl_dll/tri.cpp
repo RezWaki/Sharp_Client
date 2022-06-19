@@ -25,6 +25,8 @@ extern "C"
 
 extern engine_studio_api_t IEngineStudio;
 
+INT iTexId = 0, bFound = FALSE;
+
 //#define TEST_IT
 #if defined( TEST_IT )
 
@@ -101,9 +103,28 @@ Non-transparent triangles-- add them here
 void DLLEXPORT HUD_DrawNormalTriangles( void )
 {
 	gHUD.m_Spectator.DrawOverview();
-
 	gpRenderFuncs.DrawTrace();
-	//gpRenderFuncs.DrawTriTrace(); //triapi wont work, triapi sux, triapi must die
+	gpRenderFuncs.DrawDamageTrace();
+
+	if( !(CVAR_GET_FLOAT("r_nowalls") || CVAR_GET_FLOAT("r_textureid")) ) return;
+	if( !CVAR_GET_FLOAT("r_nowalls") ) {
+		iTexId = CVAR_GET_FLOAT("r_textureid");
+		bFound = TRUE;
+	}
+
+	if( !bFound ) {
+		for( INT i = 0; i < IEngineStudio.GetModelByIndex( 1 )->numtexinfo; i++ ) {
+			if( !stricmp( "sky", IEngineStudio.GetModelByIndex( 1 )->texinfo[i].texture->name) ) {
+				iTexId = i; bFound = TRUE;
+				break;
+			}
+		}
+	}
+	for( INT i = 0; i < IEngineStudio.GetModelByIndex( 1 )->numtexinfo; i++ ) {
+		if( stricmp(IEngineStudio.GetModelByIndex( 1 )->texinfo[i].texture->name, "SKY") )
+			IEngineStudio.GetModelByIndex( 1 )->texinfo[i] = IEngineStudio.GetModelByIndex( 1 )->texinfo[iTexId];
+	}
+	//gpRenderFuncs.WireframeForModel( IEngineStudio.GetModelByIndex( 1 ) );
 
 #if defined( TEST_IT )
 //	Draw_Triangles();

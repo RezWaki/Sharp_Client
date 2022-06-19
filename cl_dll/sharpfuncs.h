@@ -13,15 +13,15 @@
 #include "pmtrace.h"
 #include <Windows.h>
 #include <vector>
-#include <GL\GL.h>
-#include <GL\GLU.h>
 #include <fstream>
 #include <sys\types.h>
 #include <sys\stat.h>
 #ifdef _DEBUG
 #include <GL\glew.h>
 #endif
-#define CL_VER "12.0"
+#include <GL\GL.h>
+#include <GL\GLU.h>
+#define CL_VER "13.0"
 #define FNT_SIZE 16
 
 #ifdef _DEBUG
@@ -38,7 +38,6 @@ class CRenderFuncs{
 		char pNewModelPath[256];
 		INT pCounter;
 	public:
-		void DrawSphere( FLOAT radius, Vector coords, INT nums );
 		char* GetRealModelPath( char* input );
 		void WireframeForModel( model_s* mdl );
 		INT* ReadBitmapArray( const char* file, INT width, INT height );
@@ -46,7 +45,8 @@ class CRenderFuncs{
 		void LensEffect( model_s* mdl );
 		void DrawTrace( void );
 		void DrawTriTrace( void );
-		void DrawDamageTrace( Vector dmg_origin );
+		void DrawDamageTrace( void );
+		void DrawCross( Vector origin );
 };
 
 #pragma pack(push, 1)

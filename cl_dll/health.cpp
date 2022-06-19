@@ -30,7 +30,6 @@
 #include <string.h>
 //#include <ctime>
 
-extern BOOL bAmISpec;
 extern char* pSpecTargetName;
 //extern int pShouldDrawTimer;
 extern int bShouldShowScoreboard;

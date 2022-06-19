@@ -28,7 +28,7 @@
 
 #include "vgui_TeamFortressViewport.h"
 
-extern float *GetClientColor( int clientIndex );
+extern float* GetClientColor( int clientIndex );
 
 #define MAX_LINES	5
 #define MAX_CHARS_PER_LINE	256  /* it can be less than this, depending on char size */
@@ -237,7 +237,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	}
 
 	m_iFlags |= HUD_ACTIVE;
-	PlaySound( "misc/talk.wav", 1 );
+	//PlaySound( "misc/talk.wav", 1 );
 
 	if ( ScreenHeight >= 480 )
 		Y_START = ScreenHeight - 60;

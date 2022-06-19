@@ -168,11 +168,12 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	CVAR_CREATE( "cl_smart_crosshair", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "r_noplayerlights", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "r_noitemlights", "0", FCVAR_ARCHIVE );
-	CVAR_CREATE( "r_forcerendercolors", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "r_forcerendercolors", "255 255 255", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_usenewteamcolors", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_hltvmode", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "r_extrachrome", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_flashplayer", "0", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_flashtime", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_specwh", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_istimer", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_istimer_mode", "1", FCVAR_ARCHIVE );
@@ -209,8 +210,6 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	CVAR_CREATE( "cl_traceline_color", "255 0 0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_cross_trace", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_autorecord", "1", FCVAR_ARCHIVE );
-	//CVAR_CREATE( "cl_autobhop", "0", FCVAR_ARCHIVE );
-	//CVAR_CREATE( "cl_slide", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_slide_interval", "0.05", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_disablespecs", "0", FCVAR_ARCHIVE ); //ag 6.6
 	CVAR_CREATE( "cl_usenewhudstring", "0", FCVAR_ARCHIVE );
@@ -229,15 +228,31 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	CVAR_CREATE( "cl_speedometer", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_reloadstatus", "0", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_reloadstatus_pos", "0.5 0.5", FCVAR_ARCHIVE );
-	
+	CVAR_CREATE( "cl_visualizewg", "0", NULL );
+
+	#ifdef _DEBUG
+		//!!! CHEAT
+		CVAR_CREATE( "net_alwayslate", "0", NULL );
+		CVAR_CREATE( "net_draworigins", "0", NULL );
+		CVAR_CREATE( "s_mutesounds", "0", FCVAR_ARCHIVE );
+		CVAR_CREATE( "s_soundvolume", "0", FCVAR_ARCHIVE );
+		CVAR_CREATE( "s_soundlist",
+			"ambience/pulsemachine.wav;weapons/gauss2.wav;weapons/egon_run3.wav;weapons/egon_windup2.wav;",
+			FCVAR_ARCHIVE );
+		CVAR_CREATE( "r_nowalls", "0", NULL );
+	#endif
+
+	CVAR_CREATE( "r_textureid", "0", NULL );
+	CVAR_CREATE( "cl_noplayeranims", "0", NULL );
+
 	g_phud_timer = gEngfuncs.pfnRegisterVariable( "hud_timer", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 	g_pcl_liveupdate = gEngfuncs.pfnRegisterVariable( "cl_liveupdate", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
-#ifdef _DEBUG
-	CVAR_CREATE( "r_glwireframecolors", "255 0 0 255", NULL );
-	CVAR_CREATE( "r_glwireframewidth", "4", NULL );
-	CVAR_CREATE( "r_glwireframe", "0", NULL );
-	glewInit();
-#endif
+	#ifdef _DEBUG
+		CVAR_CREATE( "r_glwireframecolors", "255 0 0 255", NULL );
+		CVAR_CREATE( "r_glwireframewidth", "4", NULL );
+		CVAR_CREATE( "r_glwireframe", "0", NULL );
+		glewInit();
+	#endif
 
 	char* pClVersionInfo = new char[256];
 	char* pGameWndTitle = new char[256];
@@ -400,5 +415,3 @@ void DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
 {
 	 gHUD.m_Spectator.DirectorMessage( iSize, pbuf );
 }
-
-

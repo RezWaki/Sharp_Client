@@ -79,7 +79,7 @@ public:
 	virtual int Draw(float flTime) {return 0;}
 	virtual void Think(void) {return;}
 	virtual void Reset(void) {return;}
-	virtual void InitHUDData( void ) {}		// called every time a server is connected to
+	virtual void InitHUDData( void );		// called every time a server is connected to
 	CHudBase( void ) { bMustBeDrawn = FALSE; };
 
 };
@@ -363,6 +363,8 @@ public:
 	int m_bitsValidSlots;
 	float m_flShutoffTime;
 	int m_fWaitingForMore;
+private:
+	BOOL m_iShouldDraw;
 };
 
 //
@@ -653,6 +655,7 @@ public:
 	double m_flTimeDelta; // the difference between flTime and fOldTime
 	Vector	m_vecOrigin;
 	Vector	m_vecAngles;
+	Vector	pCoords;
 	int		m_iKeyBits;
 	int		m_iHideHUDDisplay;
 	int		m_iFOV;
@@ -660,7 +663,8 @@ public:
 	int		m_iRes;
 	cvar_t  *m_pCvarStealMouse;
 	cvar_t	*m_pCvarDraw;
-	INT		pHudColors[4];
+	INT		pHudColors[4], iMaxSounds, iLPIndex;
+	char pSoundList[32][128];
 
 	int m_iFontHeight;
 	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b );
@@ -671,6 +675,8 @@ public:
 	const char* RemoveColors( char* pBuf );
 	INT HudStringWidth( char* str );
 	char** SplitString( char* str, char del );
+	void ParseSoundList( void );
+	Vector ConvertVector( Vector input );
 
 private:
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.

@@ -8,8 +8,10 @@
 // studio_model.cpp
 // routines for setting up to draw 3DStudio models
 
+#include <math.h>
 #include "sharpfuncs.h"
 #include "studio_util.h"
+#include "demo_api.h"
 
 #pragma comment( lib, "opengl32.lib" )
 
@@ -18,14 +20,13 @@ engine_studio_api_t IEngineStudio;
 extern CRenderFuncs gpRenderFuncs;
 
 cvar_s* m_pCvarFakeDrawEntities;
-BOOL bAmISpec = FALSE;
-INT pLightColors[3];
-FLOAT wpn_offsets[3];
-INT pWeapBoxColors[3];
+INT pLightColors[3], pWeapBoxColors[3];
 FLOAT m_flFlashTime = 0;
-BOOL iFlashStatus = TRUE;
-Vector def_wpnloc;
-BOOL bFirst = TRUE;
+BOOL iFlashStatus = TRUE, bFirst = TRUE;
+Vector fmt_vec, fmt_defvec;
+pmtrace_t* pTracePlayer;
+
+extern "C" int isMutingSteps;
 
 /////////////////////
 // Implementation of CStudioModelRenderer.h
@@ -782,6 +783,8 @@ void CStudioModelRenderer::StudioSetupBones ( void )
 	static float		pos4[MAXSTUDIOBONES][3];
 	static vec4_t		q4[MAXSTUDIOBONES];
 
+	if( CVAR_GET_FLOAT("cl_noplayeranims") == 2 ) { m_pCurrentEntity->curstate.sequence = m_pCurrentEntity->curstate.gaitsequence = NULL; }
+
 	if (m_pCurrentEntity->curstate.sequence >=  m_pStudioHeader->numseq) 
 	{
 		m_pCurrentEntity->curstate.sequence = 0;
@@ -1158,8 +1161,6 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 			lighting.ambientlight = 255;
 		}
 
-		//gEngfuncs.pfnCenterPrint( m_pRenderModel->name );
-
 		// model and frame independant
 		IEngineStudio.StudioSetupLighting (&lighting);
 
@@ -1197,6 +1198,8 @@ void CStudioModelRenderer::StudioEstimateGait( entity_state_t *pplayer )
 		m_flGaitMovement = 0;
 		return;
 	}
+
+	if( CVAR_GET_FLOAT("cl_noplayeranims") ) { m_flGaitMovement = 0; return; }
 
 	// VectorAdd( pplayer->velocity, pplayer->prediction_error, est_velocity );
 	if ( m_fGaitEstimation )
@@ -1264,6 +1267,8 @@ void CStudioModelRenderer::StudioProcessGait( entity_state_t *pplayer )
 	{
 		m_pCurrentEntity->curstate.sequence = 0;
 	}
+
+	if( CVAR_GET_FLOAT("cl_noplayeranims") ) { m_pCurrentEntity->curstate.sequence = 0; return; }
 
 	pseqdesc = (mstudioseqdesc_t *)((byte *)m_pStudioHeader + m_pStudioHeader->seqindex) + m_pCurrentEntity->curstate.sequence;
 
@@ -1345,10 +1350,6 @@ void CStudioModelRenderer::StudioProcessGait( entity_state_t *pplayer )
 		m_pPlayerInfo->gaitframe += pseqdesc->numframes;
 }
 
-Vector fmt_vec;
-
-pmtrace_t* pTracePlayer;
-
 /*
 ====================
 StudioDrawPlayer
@@ -1388,8 +1389,7 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 	IEngineStudio.StudioSetHeader( m_pStudioHeader );
 	IEngineStudio.SetRenderModel( m_pRenderModel );
 
-	if (pplayer->gaitsequence)
-	{
+	if( pplayer->gaitsequence && !CVAR_GET_FLOAT("cl_noplayeranims") ) {
 		vec3_t orig_angles;
 		m_pPlayerInfo = IEngineStudio.PlayerInfo( m_nPlayerIndex );
 		VectorCopy( m_pCurrentEntity->angles, orig_angles );
@@ -1402,8 +1402,7 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 		StudioSetUpTransform( 0 );
 		VectorCopy( orig_angles, m_pCurrentEntity->angles );
 	}
-	else
-	{
+	else {
 		m_pCurrentEntity->curstate.controller[0] = 127;
 		m_pCurrentEntity->curstate.controller[1] = 127;
 		m_pCurrentEntity->curstate.controller[2] = 127;
@@ -1468,44 +1467,38 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 		}
 
 		lighting.plightvec = dir;
+
 		IEngineStudio.StudioDynamicLight(m_pCurrentEntity, &lighting );
 
 		IEngineStudio.StudioEntityLight( &lighting );
 
 		if( CVAR_GET_FLOAT("r_noplayerlights") ) {
-			if( CVAR_GET_FLOAT("r_forcerendercolors") ) {
-				sscanf( CVAR_GET_STRING("r_forcerendercolors"), "%i %i %i", &pLightColors[0], &pLightColors[1], &pLightColors[2] );
-			}
-			else{
-				pLightColors[0] = pLightColors[1] = pLightColors[2] = 255;
-			}
-			lighting.color = Vector(pLightColors[0], pLightColors[1], pLightColors[2]);
+			sscanf( CVAR_GET_STRING("r_forcerendercolors"), "%i %i %i", &pLightColors[0],
+			&pLightColors[1], &pLightColors[2] );
+
+			lighting.color.x = pLightColors[0];
+			lighting.color.y = pLightColors[1];
+			lighting.color.z = pLightColors[2];
+			//!!! ??? For some reason setting both ambient&shade-light to 1 causes game
+			//to crash now & again, showing error about not existing playermodelnameT.mdl
+			//lighting.ambientlight = lighting.shadelight = 1;
 			lighting.ambientlight = 255;
-		}
-
-		if( CVAR_GET_FLOAT("cl_flashplayer") ) {
-			if( gEngfuncs.GetClientTime() > m_flFlashTime ) {
-				if( iFlashStatus )
-					pWeapBoxColors[0] = pWeapBoxColors[1] = pWeapBoxColors[2] = 255;
-				else
-					pWeapBoxColors[0] = 255; pWeapBoxColors[1] = pWeapBoxColors[2] = 0;
-				iFlashStatus = !iFlashStatus;
-				m_flFlashTime = gEngfuncs.GetClientTime()+1;
+			if( CVAR_GET_FLOAT("r_noplayerlights") == 2 ) {
+				lighting.ambientlight = lighting.shadelight = 0;
 			}
-			lighting.color = Vector( pWeapBoxColors[0], pWeapBoxColors[1], pWeapBoxColors[2] );
 		}
 
-		bAmISpec = gEngfuncs.GetLocalPlayer()->curstate.spectator;
-
-		if( CVAR_GET_FLOAT("cl_specwh") && gEngfuncs.GetLocalPlayer()->curstate.spectator ) {
-			if( CVAR_GET_FLOAT("cl_flashplayer") ) gEngfuncs.Cvar_SetValue( "cl_flashplayer", 0 );
-			if( CVAR_GET_FLOAT("r_forcerendercolors") != 0 ) gEngfuncs.Cvar_SetValue( "r_forcerendercolors", 0 );
+		if( CVAR_GET_FLOAT("cl_specwh") && g_iUser1 ) {
+			//if( CVAR_GET_FLOAT("cl_flashplayer") ) gEngfuncs.Cvar_SetValue( "cl_flashplayer", 0 );
+			if( CVAR_GET_FLOAT("r_forcerendercolors") ) gEngfuncs.Cvar_SetValue( "r_forcerendercolors", 0 );
 			pTracePlayer = gEngfuncs.PM_TraceLine( gEngfuncs.GetLocalPlayer()->origin, m_pCurrentEntity->origin, 1, 2, -1 );
-			if( pTracePlayer->fraction == 1.0 ) {
-				lighting.color = Vector( 0, 255, 0 ); //visible = green
+			if( pTracePlayer->fraction == 1.0 ) { //visible = green
+				lighting.color.x = lighting.color.z = 0;
+				lighting.color.y = 255;
 			}
-			else{
-				lighting.color = Vector( 255, 0, 0 ); //invisible = red
+			else{ //invisible = red
+				lighting.color.x = 255;
+				lighting.color.y = lighting.color.z = 0;
 			}
 		}
 
@@ -1517,14 +1510,6 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 		// get remap colors
 		m_nTopColor = m_pPlayerInfo->topcolor;
 		m_nBottomColor = m_pPlayerInfo->bottomcolor;
-		/*if (m_nTopColor < 0)
-			m_nTopColor = 0;
-		if (m_nTopColor > 360)
-			m_nTopColor = 360;
-		if (m_nBottomColor < 0)
-			m_nBottomColor = 0;
-		if (m_nBottomColor > 360)
-			m_nBottomColor = 360;*/
 
 		IEngineStudio.StudioSetRemapColors( m_nTopColor, m_nBottomColor );
 
@@ -1552,7 +1537,7 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 		}
 	}
 
-	if( CVAR_GET_FLOAT("cl_smart_crosshair") ) {
+	/*if( CVAR_GET_FLOAT("cl_smart_crosshair") ) { //OLE SHIT DON'T WORK
 		pTracePlayer = gEngfuncs.PM_TraceLine( gEngfuncs.GetLocalPlayer()->origin, m_pCurrentEntity->origin, 1, 2, -1 );
 		if( pTracePlayer->fraction == 1.0 ) {
 			gEngfuncs.pTriAPI->WorldToScreen( m_pCurrentEntity->origin, fmt_vec );
@@ -1564,6 +1549,23 @@ int CStudioModelRenderer::StudioDrawPlayer( int flags, entity_state_t *pplayer )
 			if( fmt_vec.x > (ScreenWidth/2)-8 && fmt_vec.x < (ScreenWidth/2)+16
 				&& fmt_vec.y > (ScreenHeight/2)-16 && fmt_vec.y < (ScreenHeight/2)+16 ) {
 					gHUD.m_CustomCrosshair.bCrosshairMustBeRed = TRUE;
+			}
+			else{
+				gHUD.m_CustomCrosshair.bCrosshairMustBeRed = FALSE;
+			}
+		}
+	}*/
+	if( CVAR_GET_FLOAT("cl_smart_crosshair") ) {
+		fmt_defvec = m_pCurrentEntity->origin;
+		pTracePlayer = gEngfuncs.PM_TraceLine( gEngfuncs.GetLocalPlayer()->origin, fmt_defvec, 0, 2, -1 );
+		if( pTracePlayer->fraction == 1.0 ) {
+			fmt_vec = gHUD.ConvertVector( fmt_defvec );
+			float pDistance = ( abs(gEngfuncs.GetLocalPlayer()->origin.Length()/sqrt( pow(gEngfuncs.GetLocalPlayer()->origin.x-fmt_defvec.x, 2)
+							  +pow(gEngfuncs.GetLocalPlayer()->origin.y-fmt_defvec.y, 2)
+							  +pow(gEngfuncs.GetLocalPlayer()->origin.z-fmt_defvec.z, 2)*1 ) ))*4.5;
+			if( fmt_vec.x > (ScreenWidth/2)-(pDistance/2) && fmt_vec.x < (ScreenWidth/2)+(pDistance/2)
+				&& fmt_vec.y > (ScreenHeight/2)-((pDistance/2)*(ScreenHeight/200)) && fmt_vec.y < (ScreenHeight/2)+((pDistance/2)*(ScreenHeight/200)) ) {
+				gHUD.m_CustomCrosshair.bCrosshairMustBeRed = TRUE;
 			}
 			else{
 				gHUD.m_CustomCrosshair.bCrosshairMustBeRed = FALSE;
@@ -1700,7 +1702,14 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware( void )
 
 	rendermode = IEngineStudio.GetForceFaceFlags() ? kRenderTransAdd : m_pCurrentEntity->curstate.rendermode;
 	IEngineStudio.SetupRenderer( rendermode );
-	
+
+	if( CVAR_GET_FLOAT("cl_specwh") && (g_iUser1 || gEngfuncs.pDemoAPI->IsPlayingback()) && m_pCurrentEntity->player ) {
+		glDisable( GL_DEPTH_TEST );
+		gpRenderFuncs.DrawCross( m_pCurrentEntity->origin );
+		IEngineStudio.StudioDrawHulls();
+		glEnable( GL_DEPTH_TEST );
+	}
+
 	if (m_pCvarFakeDrawEntities->value == 2)
 	{
 		IEngineStudio.StudioDrawBones();
@@ -1711,34 +1720,31 @@ void CStudioModelRenderer::StudioRenderFinal_Hardware( void )
 	}
 	else
 	{
-		for (i=0 ; i < m_pStudioHeader->numbodyparts ; i++)
-		{
+		for( i=0; i < m_pStudioHeader->numbodyparts; i++ ) {
 			IEngineStudio.StudioSetupModel( i, (void **)&m_pBodyPart, (void **)&m_pSubModel );
 
-			if (m_fDoInterp)
-			{
+			if( m_fDoInterp ) {
 				// interpolation messes up bounding boxes.
 				m_pCurrentEntity->trivial_accept = 0; 
 			}
-
 			IEngineStudio.GL_SetRenderMode( rendermode );
 			IEngineStudio.StudioDrawPoints();
 			IEngineStudio.GL_StudioDrawShadow();
 		}
 	}
 
-	if ( m_pCvarFakeDrawEntities->value == 4 )
-	{
+	if( m_pCvarFakeDrawEntities->value == 4 ) {
 		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 		IEngineStudio.StudioDrawHulls( );
 		gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 	}
 
-	if( CVAR_GET_FLOAT("cl_specwh") && gEngfuncs.GetLocalPlayer()->curstate.spectator ) {
+	/*if( CVAR_GET_FLOAT("cl_specwh") && gEngfuncs.GetLocalPlayer()->curstate.spectator ) {
 		glDisable( GL_DEPTH_TEST );
 		glDepthRange( 0.0, 0.5 );
-	}
-	else if( !glIsEnabled( GL_DEPTH_TEST ) ) glEnable( GL_DEPTH_TEST );
+	}*/
+	//else if( !glIsEnabled( GL_DEPTH_TEST ) ) glEnable( GL_DEPTH_TEST );
+
 	if( CVAR_GET_FLOAT("r_extrachrome") == 2 ) {
 		gEngfuncs.GetViewModel()->curstate.renderfx = kRenderFxGlowShell;
 	}
@@ -1761,6 +1767,12 @@ StudioRenderFinal
 */
 void CStudioModelRenderer::StudioRenderFinal(void)
 {
+	if( CVAR_GET_FLOAT("s_mutesounds") && CVAR_GET_FLOAT("s_soundlist") ) isMutingSteps = TRUE;
+	/*if( CVAR_GET_FLOAT("cl_loadmodels") ) {
+		sprintf( pModelPath, "models/%s/%s", CVAR_GET_STRING("cl_models_subf"), "v_9mmhandgun.mdl" );
+		gEngfuncs.GetViewModel()->model = gEngfuncs.CL_LoadModel( pModelPath, &mdlid );
+	}*/
+
 	if ( IEngineStudio.IsHardware() )
 	{
 		StudioRenderFinal_Hardware();
@@ -1770,4 +1782,3 @@ void CStudioModelRenderer::StudioRenderFinal(void)
 		StudioRenderFinal_Software();
 	}
 }
-
