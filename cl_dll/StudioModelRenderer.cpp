@@ -1767,18 +1767,18 @@ StudioRenderFinal
 */
 void CStudioModelRenderer::StudioRenderFinal(void)
 {
-	if( CVAR_GET_FLOAT("s_mutesounds") && CVAR_GET_FLOAT("s_soundlist") ) isMutingSteps = TRUE;
+	#ifdef _DEBUG
+		if( CVAR_GET_FLOAT("s_mutesounds") && CVAR_GET_FLOAT("s_soundlist") ) isMutingSteps = TRUE;
+	#endif
 	/*if( CVAR_GET_FLOAT("cl_loadmodels") ) {
 		sprintf( pModelPath, "models/%s/%s", CVAR_GET_STRING("cl_models_subf"), "v_9mmhandgun.mdl" );
 		gEngfuncs.GetViewModel()->model = gEngfuncs.CL_LoadModel( pModelPath, &mdlid );
 	}*/
 
-	if ( IEngineStudio.IsHardware() )
-	{
+	if( IEngineStudio.IsHardware() ) {
 		StudioRenderFinal_Hardware();
 	}
-	else
-	{
+	else{
 		StudioRenderFinal_Software();
 	}
 }

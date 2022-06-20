@@ -112,19 +112,20 @@ void DLLEXPORT HUD_DrawNormalTriangles( void )
 		bFound = TRUE;
 	}
 
-	if( !bFound ) {
-		for( INT i = 0; i < IEngineStudio.GetModelByIndex( 1 )->numtexinfo; i++ ) {
-			if( !stricmp( "sky", IEngineStudio.GetModelByIndex( 1 )->texinfo[i].texture->name) ) {
-				iTexId = i; bFound = TRUE;
-				break;
+	#ifdef _DEBUG
+		if( !bFound ) {
+			for( INT i = 0; i < IEngineStudio.GetModelByIndex( 1 )->numtexinfo; i++ ) {
+				if( !stricmp( "sky", IEngineStudio.GetModelByIndex( 1 )->texinfo[i].texture->name) ) {
+					iTexId = i; bFound = TRUE;
+					break;
+				}
 			}
 		}
-	}
+	#endif
 	for( INT i = 0; i < IEngineStudio.GetModelByIndex( 1 )->numtexinfo; i++ ) {
 		if( stricmp(IEngineStudio.GetModelByIndex( 1 )->texinfo[i].texture->name, "SKY") )
 			IEngineStudio.GetModelByIndex( 1 )->texinfo[i] = IEngineStudio.GetModelByIndex( 1 )->texinfo[iTexId];
 	}
-	//gpRenderFuncs.WireframeForModel( IEngineStudio.GetModelByIndex( 1 ) );
 
 #if defined( TEST_IT )
 //	Draw_Triangles();

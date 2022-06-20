@@ -101,15 +101,17 @@ void SendWeapAnim( int sequence, int body ) {
 }
 
 void PlaySnd( int ent, float *origin, int channel, const char *sample, float volume, float attenuation, int fFlags, int pitch ) {
-	if( CVAR_GET_FLOAT("s_mutesounds") && (!ent || EV_IsLocal(ent)) ) {
-		if( CVAR_GET_FLOAT("s_soundlist") ) return;
-		for( INT i = 0; i < gHUD.iMaxSounds; i++ ) {
-			if( gHUD.pSoundList[i] && !strcmp(sample, gHUD.pSoundList[i]) )
-				return;
+	#ifdef _DEBUG
+		if( CVAR_GET_FLOAT("s_mutesounds") && (!ent || EV_IsLocal(ent)) ) {
+			if( CVAR_GET_FLOAT("s_soundlist") ) return;
+			for( INT i = 0; i < gHUD.iMaxSounds; i++ ) {
+				if( gHUD.pSoundList[i] && !strcmp(sample, gHUD.pSoundList[i]) )
+					return;
+			}
 		}
-	}
-	if( CVAR_GET_FLOAT("s_soundvolume") && (!ent || EV_IsLocal(ent)) )
-		volume = CVAR_GET_FLOAT("s_soundvolume");
+		if( CVAR_GET_FLOAT("s_soundvolume") && (!ent || EV_IsLocal(ent)) )
+			volume = CVAR_GET_FLOAT("s_soundvolume");
+	#endif
 	
 	gEngfuncs.pEventAPI->EV_PlaySound( ent, origin, channel, sample, volume, attenuation, fFlags, pitch );
 }

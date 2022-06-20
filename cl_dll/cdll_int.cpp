@@ -230,6 +230,12 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	CVAR_CREATE( "cl_reloadstatus_pos", "0.5 0.5", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_visualizewg", "0", NULL );
 
+	CVAR_CREATE( "r_nowalls", "0", NULL );
+	CVAR_CREATE( "r_textureid", "0", NULL );
+	CVAR_CREATE( "cl_noplayeranims", "0", NULL );
+
+	g_phud_timer = gEngfuncs.pfnRegisterVariable( "hud_timer", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
+	g_pcl_liveupdate = gEngfuncs.pfnRegisterVariable( "cl_liveupdate", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
 	#ifdef _DEBUG
 		//!!! CHEAT
 		CVAR_CREATE( "net_alwayslate", "0", NULL );
@@ -239,15 +245,7 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 		CVAR_CREATE( "s_soundlist",
 			"ambience/pulsemachine.wav;weapons/gauss2.wav;weapons/egon_run3.wav;weapons/egon_windup2.wav;",
 			FCVAR_ARCHIVE );
-		CVAR_CREATE( "r_nowalls", "0", NULL );
-	#endif
 
-	CVAR_CREATE( "r_textureid", "0", NULL );
-	CVAR_CREATE( "cl_noplayeranims", "0", NULL );
-
-	g_phud_timer = gEngfuncs.pfnRegisterVariable( "hud_timer", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
-	g_pcl_liveupdate = gEngfuncs.pfnRegisterVariable( "cl_liveupdate", "0", FCVAR_CLIENTDLL | FCVAR_ARCHIVE);
-	#ifdef _DEBUG
 		CVAR_CREATE( "r_glwireframecolors", "255 0 0 255", NULL );
 		CVAR_CREATE( "r_glwireframewidth", "4", NULL );
 		CVAR_CREATE( "r_glwireframe", "0", NULL );

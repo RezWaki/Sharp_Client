@@ -713,7 +713,9 @@ void CHudBase::InitHUDData( void ) {
 	for( INT i = 1; i < 11; i++ ) gMyShotStats[i] = 0;
 	for( INT i = 0; i < 9; i++ ) m_gFlGaussDmg[i] = 0;
 
-	gHUD.ParseSoundList();
+	#ifdef _DEBUG
+		gHUD.ParseSoundList();
+	#endif
 	gHUD.m_Menu.Reset();
 }
 
